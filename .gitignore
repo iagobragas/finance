@@ -21,3 +21,4 @@ exemplo/ledger/imported.beancount
 
 # link local com o projeto da Vercel
 .vercel
+.env*
