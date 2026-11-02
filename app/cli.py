@@ -108,6 +108,9 @@ def main():
         build()
         sys.exit(0 if check() else 1)
     elif cmd == "check":
+        # imported.beancount é gerado pelo build; num clone novo (ou em exemplo/) ele ainda não existe
+        if not (LEDGER.parent / "imported.beancount").exists():
+            build(verbose=False)
         sys.exit(0 if check() else 1)
     elif cmd == "serve":
         try:
