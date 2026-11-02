@@ -1,5 +1,7 @@
 # finance
 
+> **English:** Personal and MEI (Brazilian sole-proprietor) finance tracker that runs locally on macOS, built on [Beancount](https://beancount.github.io/docs/) + [Fava](https://beancount.github.io/fava/). Imports statements from Brazilian banks (Inter, Nubank, Cora, any OFX). The UI and docs are in Portuguese.
+
 **Controle financeiro pessoal e de MEI que roda no seu Mac.** Você baixa os extratos do banco e arrasta para o painel. O sistema categoriza tudo e mostra quanto sobra até o fim do mês, para onde foi o dinheiro e como ficam os próximos meses.
 
 - 🔒 **100% local:** seus dados nunca saem do seu computador. Não tem conta, nuvem nem login no banco.
