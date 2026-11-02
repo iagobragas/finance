@@ -1,8 +1,9 @@
 #!/bin/sh
-# Atalho: ./finance [build|check]
+# Atalho: ./finance [build|check|init|exemplo]
+# O uv cuida do Python (versão em .python-version) e das dependências (travadas em uv.lock).
 cd "$(dirname "$0")" || exit 1
-if [ ! -x .venv/bin/python ]; then
-  echo "Criando ambiente Python (.venv)…"
-  python3.11 -m venv .venv && .venv/bin/pip install -q -r requirements.txt || exit 1
+if ! command -v uv >/dev/null 2>&1; then
+  echo "✗ uv não encontrado. Instale com: brew install uv" >&2
+  exit 1
 fi
-exec .venv/bin/python -m app.cli "$@"
+exec uv run --frozen --no-dev --quiet python -m app.cli "$@"

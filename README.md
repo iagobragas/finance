@@ -35,13 +35,13 @@
 Precisa de um Mac com [Homebrew](https://brew.sh).
 
 ```sh
-brew install python@3.11 poppler git
+brew install uv poppler git
 git clone https://github.com/iagobragas/finance.git
 cd finance
 ./finance exemplo
 ```
 
-O painel abre em **http://localhost:5050** com dados fictícios, para você explorar. Na primeira vez, o `./finance` instala as dependências sozinho, o que leva menos de um minuto. Para sair, use `Ctrl+C`.
+O painel abre em **http://localhost:5050** com dados fictícios, para você explorar. Na primeira vez, o `./finance` baixa o Python e instala as dependências sozinho (com o [uv](https://docs.astral.sh/uv/), nas versões travadas em `uv.lock`), o que leva menos de um minuto. Para sair, use `Ctrl+C`.
 
 ### Usar com os seus dados
 
@@ -146,7 +146,7 @@ ln -s ~/Library/Mobile\ Documents/com~apple~CloudDocs/Financas dados
 **No outro Mac:**
 
 ```sh
-brew install python@3.11 poppler git
+brew install uv poppler git
 git clone https://github.com/iagobragas/finance.git && cd finance
 ln -s ~/Library/Mobile\ Documents/com~apple~CloudDocs/Financas dados
 ./finance
@@ -211,7 +211,7 @@ Assets:Transferencias          dinheiro que só mudou de conta
 ## Contribuir
 
 ```
-finance                 atalho: cria o ambiente Python e chama app/cli.py
+finance                 atalho: roda app/cli.py com o uv (Python e dependências de pyproject.toml/uv.lock)
 app/paths.py            onde ficam o código e os dados
 app/parsers.py          leitura de cada formato de extrato
 app/organize.py         inbox → statements (reconhece, renomeia, descarta repetidos)
@@ -220,6 +220,8 @@ app/forecast.py         previsão e plano
 app/cycles.py           ciclos e faturas
 app/fava_resumo/        o painel: uma classe Python, um template e um .js por aba
 exemplo/                dados fictícios (./finance exemplo)
+tests/                  testes sobre uma cópia de exemplo/ (uv run pytest)
+demo.py, index.py       demo pública na Vercel (exemplo/, somente leitura)
 ```
 
 **Para adicionar um banco:**
@@ -228,7 +230,14 @@ exemplo/                dados fictícios (./finance exemplo)
 2. Registre as duas na lista usada pelo `detect()`.
 3. Adicione a fonte em `sources` no `accounts.yaml` de exemplo.
 
-Antes de abrir um PR, rode `./finance exemplo` e confira todas as abas.
+Antes de abrir um PR:
+
+```sh
+uv run pytest        # importa e valida o exemplo/ e abre todas as abas
+./finance exemplo    # confira visualmente
+```
+
+**Dependências:** declare em `pyproject.toml` e rode `uv lock`. O `requirements.txt` é gerado para a Vercel; atualize com `uv export --frozen --no-dev --no-hashes --no-emit-project -o requirements.txt`.
 
 ---
 
