@@ -237,7 +237,7 @@ uv run pytest        # importa e valida o exemplo/ e abre todas as abas
 ./finance exemplo    # confira visualmente
 ```
 
-**Dependências:** declare em `pyproject.toml` e rode `uv lock`. O `requirements.txt` é gerado para a Vercel; atualize com `uv export --frozen --no-dev --no-hashes --no-emit-project -o requirements.txt`.
+**Dependências:** declare em `pyproject.toml` e rode `uv lock`. O `uv.lock` vale para todos: o `./finance`, os testes e a demo na Vercel.
 
 ---
 
