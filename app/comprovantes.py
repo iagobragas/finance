@@ -16,6 +16,7 @@ from pathlib import Path
 
 import yaml
 from beancount.core.data import Transaction
+
 from app.paths import DATA
 
 PASTA = DATA / "comprovantes"

@@ -1,0 +1,23 @@
+# Lint e testes a cada push na main e em todo PR. Os testes usam só exemplo/ (dados fictícios).
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: astral-sh/setup-uv@v10.3.0
+        with:
+          enable-cache: true
+      - name: Lint (ruff)
+        run: uv run --frozen ruff check .
+      - name: Testes (pytest)
+        run: uv run --frozen pytest

@@ -16,10 +16,10 @@ import re
 from collections import defaultdict
 from datetime import date
 from decimal import Decimal
-from pathlib import Path
 
 import yaml
 from beancount.core.data import Transaction
+
 from app.paths import CONFIG as CONFIG_DIR
 
 CONFIG = CONFIG_DIR / "forecast.yaml"
@@ -172,7 +172,8 @@ def forecast(entries, today: date, horizon: int | None = None, cfg: dict | None 
 
     # ---- categorias de gasto
     # assinaturas: em vez da média, a soma das assinaturas ativas (continuam até você marcar "Cancelei")
-    from app.assinaturas import detectar as _subs, mensal as _mensal
+    from app.assinaturas import detectar as _subs
+    from app.assinaturas import mensal as _mensal
     subs = _subs(entries, today)
     por_assinatura = _mensal(subs)
     try:

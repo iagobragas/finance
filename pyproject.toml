@@ -14,6 +14,7 @@ dependencies = [
 [dependency-groups]
 dev = [
     "pytest>=8",
+    "ruff>=0.17.3",
 ]
 
 [tool.uv]
@@ -23,3 +24,18 @@ package = false
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 pythonpath = ["."]
+
+[tool.ruff]
+line-length = 120
+
+[tool.ruff.lint]
+# erros reais (F, E9), imports (I), armadilhas comuns (B), sintaxe moderna (UP) e extras do ruff (RUF)
+select = ["E4", "E7", "E9", "F", "I", "B", "UP", "RUF"]
+ignore = [
+    "E731",  # lambda atribuída a variável: usada de propósito para funções curtas
+    "E741",  # nomes como l/i/o
+    "B007",  # variável de loop não usada
+    "B905",  # zip() sem strict=
+    "RUF001", "RUF002", "RUF003",  # travessão e aspas tipográficas em textos em português
+    "RUF005", "RUF059",
+]

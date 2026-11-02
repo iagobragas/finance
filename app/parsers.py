@@ -14,6 +14,7 @@ from dataclasses import dataclass, field
 from datetime import date, datetime
 from decimal import Decimal
 from pathlib import Path
+
 from app.paths import CONFIG as CONFIG_DIR
 
 
