@@ -10,7 +10,7 @@ import os
 import shutil
 import sys
 from pathlib import Path
-from urllib.parse import unquote_to_bytes
+from urllib.parse import quote, unquote_to_bytes
 
 ROOT = Path(__file__).resolve().parent
 DEMO_DATA = Path("/tmp/finance-demo")
@@ -22,7 +22,7 @@ os.environ["FINANCE_DATA"] = str(DEMO_DATA)
 sys.path.insert(0, str(ROOT))  # para o Fava achar a extensão app.fava_resumo
 
 from fava.application import create_app  # noqa: E402
-from flask import request  # noqa: E402
+from flask import request, send_file  # noqa: E402
 
 from app.build import build  # noqa: E402
 
@@ -62,11 +62,40 @@ BANNER = (
 )
 
 
+# Pré-visualização ao compartilhar o link (WhatsApp, Slack, LinkedIn…): Open Graph + Twitter card
+SITE = "https://finance-demo.iagobragas.com.br"
+TITULO = "finance: controle financeiro pessoal e de MEI"
+DESCRICAO = ("Quanto sobra até o fim do mês, para onde foi o dinheiro e como ficam os próximos meses. "
+             "Beancount + Fava, roda no seu Mac. Demo com dados fictícios.")
+OG = (
+    f'<meta property="og:type" content="website">'
+    f'<meta property="og:site_name" content="finance">'
+    f'<meta property="og:locale" content="pt_BR">'
+    f'<meta property="og:title" content="{TITULO}">'
+    f'<meta property="og:description" content="{DESCRICAO}">'
+    f'<meta property="og:image" content="{SITE}/og.jpg">'
+    f'<meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">'
+    f'<meta property="og:image:alt" content="Aba Ciclo: quanto sobra até o fim do ciclo">'
+    f'<meta name="twitter:card" content="summary_large_image">'
+    f'<meta name="description" content="{DESCRICAO}">'
+)
+
+
+@app.route("/og.jpg")
+def _og_imagem():
+    return send_file(ROOT / "demo_assets" / "og.jpg", mimetype="image/jpeg", max_age=86400)
+
+
 @app.after_request
 def _aviso_demo(resp):
     if resp.mimetype == "text/html" and not resp.direct_passthrough:
         html = resp.get_data(as_text=True)
+        if "<head" in html:
+            i = html.index(">", html.index("<head")) + 1
+            url = f'<meta property="og:url" content="{SITE}{quote(request.path)}">'
+            html = html[:i] + OG + url + html[i:]
         if "<body" in html:
             i = html.index(">", html.index("<body")) + 1
-            resp.set_data(html[:i] + BANNER + html[i:])
+            html = html[:i] + BANNER + html[i:]
+        resp.set_data(html)
     return resp
