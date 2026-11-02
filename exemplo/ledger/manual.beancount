@@ -1,0 +1,436 @@
+;; Lançamentos manuais: o que não aparece em nenhum extrato (dinheiro vivo, empréstimos...).
+;; Este arquivo de EXEMPLO tem quatro meses fictícios para você ver as abas funcionando.
+;; Na sua pasta de dados, este arquivo começa vazio e é preenchido pela aba Lançar.
+
+2026-06-30 * "Saldo inicial"
+  Assets:Inter:PF          3000.00 BRL
+  Equity:Saldo-Inicial
+
+2026-07-05 * "Acme" "Salário"
+  Assets:Cora:PJ                             5000.00 BRL
+  Income:Trabalho:Acme
+
+2026-07-06 * "Transferência" "PJ para PF"
+  Assets:Inter:PF                            5000.00 BRL
+  Assets:Cora:PJ
+
+2026-07-10 * "Imobiliária" "Aluguel"
+  Expenses:Fixas:Moradia                     1500.00 BRL
+  Assets:Inter:PF
+
+2026-07-12 * "Netflix" "Assinatura"
+  Expenses:Fixas:Assinaturas                   44.90 BRL
+  Liabilities:Cartao:Inter
+
+2026-07-20 * "Receita Federal" "DAS MEI"
+  Expenses:Fixas:Impostos                      86.05 BRL
+  Assets:Inter:PF
+
+2026-07-11 * "Restaurante Sabor" ""
+  Expenses:Variaveis:Restaurantes             115.83 BRL
+  Liabilities:Cartao:Inter
+
+2026-07-13 * "Restaurante Sabor" ""
+  Expenses:Variaveis:Restaurantes              92.07 BRL
+  Liabilities:Cartao:Inter
+
+2026-07-03 * "Restaurante Sabor" ""
+  Expenses:Variaveis:Restaurantes             105.70 BRL
+  Liabilities:Cartao:Inter
+
+2026-07-04 * "Restaurante Sabor" ""
+  Expenses:Variaveis:Restaurantes              69.26 BRL
+  Liabilities:Cartao:Inter
+
+2026-07-02 * "Restaurante Sabor" ""
+  Expenses:Variaveis:Restaurantes             112.78 BRL
+  Liabilities:Cartao:Inter
+
+2026-07-07 * "Restaurante Sabor" ""
+  Expenses:Variaveis:Restaurantes              43.00 BRL
+  Liabilities:Cartao:Inter
+
+2026-07-14 * "Supermercado Bom Preço" ""
+  Expenses:Variaveis:Mercado                  192.91 BRL
+  Liabilities:Cartao:Inter
+
+2026-07-08 * "Supermercado Bom Preço" ""
+  Expenses:Variaveis:Mercado                  104.49 BRL
+  Liabilities:Cartao:Inter
+
+2026-07-14 * "Supermercado Bom Preço" ""
+  Expenses:Variaveis:Mercado                   95.96 BRL
+  Liabilities:Cartao:Inter
+
+2026-07-19 * "Supermercado Bom Preço" ""
+  Expenses:Variaveis:Mercado                  113.43 BRL
+  Liabilities:Cartao:Inter
+
+2026-07-08 * "Uber" ""
+  Expenses:Variaveis:Transporte:Uber           30.77 BRL
+  Liabilities:Cartao:Inter
+
+2026-07-19 * "Uber" ""
+  Expenses:Variaveis:Transporte:Uber           38.69 BRL
+  Liabilities:Cartao:Inter
+
+2026-07-19 * "Uber" ""
+  Expenses:Variaveis:Transporte:Uber           29.64 BRL
+  Liabilities:Cartao:Inter
+
+2026-07-02 * "Uber" ""
+  Expenses:Variaveis:Transporte:Uber           39.41 BRL
+  Liabilities:Cartao:Inter
+
+2026-07-02 * "Uber" ""
+  Expenses:Variaveis:Transporte:Uber           28.92 BRL
+  Liabilities:Cartao:Inter
+
+2026-07-05 * "iFood" ""
+  Expenses:Variaveis:Delivery                  48.03 BRL
+  Liabilities:Cartao:Inter
+
+2026-07-05 * "iFood" ""
+  Expenses:Variaveis:Delivery                  59.33 BRL
+  Liabilities:Cartao:Inter
+
+2026-07-19 * "iFood" ""
+  Expenses:Variaveis:Delivery                  48.88 BRL
+  Liabilities:Cartao:Inter
+
+2026-07-27 * "Cinema" ""
+  Expenses:Variaveis:Lazer                     57.28 BRL
+  Liabilities:Cartao:Inter
+
+2026-07-04 * "Posto Shell" ""
+  Expenses:Variaveis:Transporte:Combustivel    208.16 BRL
+  Liabilities:Cartao:Inter
+
+2026-07-21 * "Posto Shell" ""
+  Expenses:Variaveis:Transporte:Combustivel    168.79 BRL
+  Liabilities:Cartao:Inter
+
+2026-08-15 * "Banco Inter" "Pagamento da fatura"
+  Liabilities:Cartao:Inter                   1848.23 BRL
+  Assets:Inter:PF
+
+2026-08-05 * "Acme" "Salário"
+  Assets:Cora:PJ                             5000.00 BRL
+  Income:Trabalho:Acme
+
+2026-08-06 * "Transferência" "PJ para PF"
+  Assets:Inter:PF                            5000.00 BRL
+  Assets:Cora:PJ
+
+2026-08-10 * "Imobiliária" "Aluguel"
+  Expenses:Fixas:Moradia                     1500.00 BRL
+  Assets:Inter:PF
+
+2026-08-12 * "Netflix" "Assinatura"
+  Expenses:Fixas:Assinaturas                   44.90 BRL
+  Liabilities:Cartao:Inter
+
+2026-08-20 * "Receita Federal" "DAS MEI"
+  Expenses:Fixas:Impostos                      86.05 BRL
+  Assets:Inter:PF
+
+2026-08-04 * "Restaurante Sabor" ""
+  Expenses:Variaveis:Restaurantes              83.82 BRL
+  Liabilities:Cartao:Inter
+
+2026-08-03 * "Restaurante Sabor" ""
+  Expenses:Variaveis:Restaurantes              85.15 BRL
+  Liabilities:Cartao:Inter
+
+2026-08-20 * "Restaurante Sabor" ""
+  Expenses:Variaveis:Restaurantes              56.48 BRL
+  Liabilities:Cartao:Inter
+
+2026-08-22 * "Restaurante Sabor" ""
+  Expenses:Variaveis:Restaurantes              82.54 BRL
+  Liabilities:Cartao:Inter
+
+2026-08-25 * "Restaurante Sabor" ""
+  Expenses:Variaveis:Restaurantes              65.13 BRL
+  Liabilities:Cartao:Inter
+
+2026-08-19 * "Restaurante Sabor" ""
+  Expenses:Variaveis:Restaurantes             113.88 BRL
+  Liabilities:Cartao:Inter
+
+2026-08-12 * "Supermercado Bom Preço" ""
+  Expenses:Variaveis:Mercado                  160.94 BRL
+  Liabilities:Cartao:Inter
+
+2026-08-26 * "Supermercado Bom Preço" ""
+  Expenses:Variaveis:Mercado                  128.54 BRL
+  Liabilities:Cartao:Inter
+
+2026-08-25 * "Supermercado Bom Preço" ""
+  Expenses:Variaveis:Mercado                  145.91 BRL
+  Liabilities:Cartao:Inter
+
+2026-08-19 * "Supermercado Bom Preço" ""
+  Expenses:Variaveis:Mercado                  161.07 BRL
+  Liabilities:Cartao:Inter
+
+2026-08-16 * "Uber" ""
+  Expenses:Variaveis:Transporte:Uber           36.88 BRL
+  Liabilities:Cartao:Inter
+
+2026-08-24 * "Uber" ""
+  Expenses:Variaveis:Transporte:Uber           26.22 BRL
+  Liabilities:Cartao:Inter
+
+2026-08-20 * "Uber" ""
+  Expenses:Variaveis:Transporte:Uber           39.50 BRL
+  Liabilities:Cartao:Inter
+
+2026-08-04 * "Uber" ""
+  Expenses:Variaveis:Transporte:Uber           27.80 BRL
+  Liabilities:Cartao:Inter
+
+2026-08-06 * "Uber" ""
+  Expenses:Variaveis:Transporte:Uber           33.93 BRL
+  Liabilities:Cartao:Inter
+
+2026-08-05 * "iFood" ""
+  Expenses:Variaveis:Delivery                  77.00 BRL
+  Liabilities:Cartao:Inter
+
+2026-08-14 * "iFood" ""
+  Expenses:Variaveis:Delivery                  36.76 BRL
+  Liabilities:Cartao:Inter
+
+2026-08-22 * "iFood" ""
+  Expenses:Variaveis:Delivery                  38.49 BRL
+  Liabilities:Cartao:Inter
+
+2026-08-18 * "Cinema" ""
+  Expenses:Variaveis:Lazer                     52.92 BRL
+  Liabilities:Cartao:Inter
+
+2026-08-27 * "Posto Shell" ""
+  Expenses:Variaveis:Transporte:Combustivel    181.37 BRL
+  Liabilities:Cartao:Inter
+
+2026-08-23 * "Posto Shell" ""
+  Expenses:Variaveis:Transporte:Combustivel    185.02 BRL
+  Liabilities:Cartao:Inter
+
+2026-09-15 * "Banco Inter" "Pagamento da fatura"
+  Liabilities:Cartao:Inter                   1864.25 BRL
+  Assets:Inter:PF
+
+2026-09-05 * "Acme" "Salário"
+  Assets:Cora:PJ                             5000.00 BRL
+  Income:Trabalho:Acme
+
+2026-09-06 * "Transferência" "PJ para PF"
+  Assets:Inter:PF                            5000.00 BRL
+  Assets:Cora:PJ
+
+2026-09-10 * "Imobiliária" "Aluguel"
+  Expenses:Fixas:Moradia                     1500.00 BRL
+  Assets:Inter:PF
+
+2026-09-12 * "Netflix" "Assinatura"
+  Expenses:Fixas:Assinaturas                   44.90 BRL
+  Liabilities:Cartao:Inter
+
+2026-09-20 * "Receita Federal" "DAS MEI"
+  Expenses:Fixas:Impostos                      86.05 BRL
+  Assets:Inter:PF
+
+2026-09-16 * "Restaurante Sabor" ""
+  Expenses:Variaveis:Restaurantes              86.39 BRL
+  Liabilities:Cartao:Inter
+
+2026-09-15 * "Restaurante Sabor" ""
+  Expenses:Variaveis:Restaurantes              45.50 BRL
+  Liabilities:Cartao:Inter
+
+2026-09-03 * "Restaurante Sabor" ""
+  Expenses:Variaveis:Restaurantes             115.57 BRL
+  Liabilities:Cartao:Inter
+
+2026-09-16 * "Restaurante Sabor" ""
+  Expenses:Variaveis:Restaurantes              95.76 BRL
+  Liabilities:Cartao:Inter
+
+2026-09-03 * "Restaurante Sabor" ""
+  Expenses:Variaveis:Restaurantes              44.85 BRL
+  Liabilities:Cartao:Inter
+
+2026-09-23 * "Restaurante Sabor" ""
+  Expenses:Variaveis:Restaurantes              64.77 BRL
+  Liabilities:Cartao:Inter
+
+2026-09-19 * "Supermercado Bom Preço" ""
+  Expenses:Variaveis:Mercado                  348.14 BRL
+  Liabilities:Cartao:Inter
+
+2026-09-27 * "Supermercado Bom Preço" ""
+  Expenses:Variaveis:Mercado                  200.32 BRL
+  Liabilities:Cartao:Inter
+
+2026-09-23 * "Supermercado Bom Preço" ""
+  Expenses:Variaveis:Mercado                  184.16 BRL
+  Liabilities:Cartao:Inter
+
+2026-09-22 * "Supermercado Bom Preço" ""
+  Expenses:Variaveis:Mercado                  173.69 BRL
+  Liabilities:Cartao:Inter
+
+2026-09-15 * "Uber" ""
+  Expenses:Variaveis:Transporte:Uber           23.89 BRL
+  Liabilities:Cartao:Inter
+
+2026-09-20 * "Uber" ""
+  Expenses:Variaveis:Transporte:Uber           17.93 BRL
+  Liabilities:Cartao:Inter
+
+2026-09-02 * "Uber" ""
+  Expenses:Variaveis:Transporte:Uber           20.46 BRL
+  Liabilities:Cartao:Inter
+
+2026-09-10 * "Uber" ""
+  Expenses:Variaveis:Transporte:Uber           18.23 BRL
+  Liabilities:Cartao:Inter
+
+2026-09-08 * "Uber" ""
+  Expenses:Variaveis:Transporte:Uber           24.95 BRL
+  Liabilities:Cartao:Inter
+
+2026-09-28 * "iFood" ""
+  Expenses:Variaveis:Delivery                  57.34 BRL
+  Liabilities:Cartao:Inter
+
+2026-09-06 * "iFood" ""
+  Expenses:Variaveis:Delivery                  55.21 BRL
+  Liabilities:Cartao:Inter
+
+2026-09-18 * "iFood" ""
+  Expenses:Variaveis:Delivery                  47.50 BRL
+  Liabilities:Cartao:Inter
+
+2026-09-05 * "Cinema" ""
+  Expenses:Variaveis:Lazer                     62.77 BRL
+  Liabilities:Cartao:Inter
+
+2026-09-28 * "Posto Shell" ""
+  Expenses:Variaveis:Transporte:Combustivel    205.02 BRL
+  Liabilities:Cartao:Inter
+
+2026-09-23 * "Posto Shell" ""
+  Expenses:Variaveis:Transporte:Combustivel    191.53 BRL
+  Liabilities:Cartao:Inter
+
+2026-10-15 * "Banco Inter" "Pagamento da fatura"
+  Liabilities:Cartao:Inter                   2128.88 BRL
+  Assets:Inter:PF
+
+2026-10-05 * "Acme" "Salário"
+  Assets:Cora:PJ                             5000.00 BRL
+  Income:Trabalho:Acme
+
+2026-10-06 * "Transferência" "PJ para PF"
+  Assets:Inter:PF                            5000.00 BRL
+  Assets:Cora:PJ
+
+2026-10-10 * "Imobiliária" "Aluguel"
+  Expenses:Fixas:Moradia                     1500.00 BRL
+  Assets:Inter:PF
+
+2026-10-12 * "Netflix" "Assinatura"
+  Expenses:Fixas:Assinaturas                   44.90 BRL
+  Liabilities:Cartao:Inter
+
+2026-10-20 * "Receita Federal" "DAS MEI"
+  Expenses:Fixas:Impostos                      86.05 BRL
+  Assets:Inter:PF
+
+2026-10-12 * "Restaurante Sabor" ""
+  Expenses:Variaveis:Restaurantes              94.62 BRL
+  Liabilities:Cartao:Inter
+
+2026-10-13 * "Restaurante Sabor" ""
+  Expenses:Variaveis:Restaurantes             116.62 BRL
+  Liabilities:Cartao:Inter
+
+2026-10-05 * "Restaurante Sabor" ""
+  Expenses:Variaveis:Restaurantes              46.64 BRL
+  Liabilities:Cartao:Inter
+
+2026-10-05 * "Restaurante Sabor" ""
+  Expenses:Variaveis:Restaurantes              58.56 BRL
+  Liabilities:Cartao:Inter
+
+2026-10-08 * "Restaurante Sabor" ""
+  Expenses:Variaveis:Restaurantes              40.97 BRL
+  Liabilities:Cartao:Inter
+
+2026-10-27 * "Restaurante Sabor" ""
+  Expenses:Variaveis:Restaurantes              87.13 BRL
+  Liabilities:Cartao:Inter
+
+2026-10-09 * "Supermercado Bom Preço" ""
+  Expenses:Variaveis:Mercado                  156.12 BRL
+  Liabilities:Cartao:Inter
+
+2026-10-05 * "Supermercado Bom Preço" ""
+  Expenses:Variaveis:Mercado                  193.12 BRL
+  Liabilities:Cartao:Inter
+
+2026-10-12 * "Supermercado Bom Preço" ""
+  Expenses:Variaveis:Mercado                  244.65 BRL
+  Liabilities:Cartao:Inter
+
+2026-10-11 * "Supermercado Bom Preço" ""
+  Expenses:Variaveis:Mercado                  337.34 BRL
+  Liabilities:Cartao:Inter
+
+2026-10-23 * "Uber" ""
+  Expenses:Variaveis:Transporte:Uber           36.48 BRL
+  Liabilities:Cartao:Inter
+
+2026-10-20 * "Uber" ""
+  Expenses:Variaveis:Transporte:Uber           31.37 BRL
+  Liabilities:Cartao:Inter
+
+2026-10-24 * "Uber" ""
+  Expenses:Variaveis:Transporte:Uber           16.35 BRL
+  Liabilities:Cartao:Inter
+
+2026-10-28 * "Uber" ""
+  Expenses:Variaveis:Transporte:Uber           34.50 BRL
+  Liabilities:Cartao:Inter
+
+2026-10-28 * "Uber" ""
+  Expenses:Variaveis:Transporte:Uber           32.01 BRL
+  Liabilities:Cartao:Inter
+
+2026-10-18 * "iFood" ""
+  Expenses:Variaveis:Delivery                  52.66 BRL
+  Liabilities:Cartao:Inter
+
+2026-10-13 * "iFood" ""
+  Expenses:Variaveis:Delivery                  52.74 BRL
+  Liabilities:Cartao:Inter
+
+2026-10-16 * "iFood" ""
+  Expenses:Variaveis:Delivery                  63.54 BRL
+  Liabilities:Cartao:Inter
+
+2026-10-02 * "Cinema" ""
+  Expenses:Variaveis:Lazer                     37.62 BRL
+  Liabilities:Cartao:Inter
+
+2026-10-07 * "Posto Shell" ""
+  Expenses:Variaveis:Transporte:Combustivel    194.06 BRL
+  Liabilities:Cartao:Inter
+
+2026-10-04 * "Posto Shell" ""
+  Expenses:Variaveis:Transporte:Combustivel    184.01 BRL
+  Liabilities:Cartao:Inter
+

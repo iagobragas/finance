@@ -1,0 +1,202 @@
+{% include '_style.html' %}
+<style>
+.gs {
+  --m1: #eb6834; --m2: #4a3aa7; --m3: #1baf7a; --m4: #eda100; --m5: #2a78d6; --m6: #e87ba4; --m-other: #98a2b3;
+  --chip: var(--surface-2); --chip-on: var(--accent); --chip-on-ink: var(--on-accent);
+}
+@media (prefers-color-scheme: dark) {
+  .gs { --m1: #d95926; --m2: #9085e9; --m3: #199e70; --m4: #c98500; --m5: #3987e5; --m6: #d55181; --m-other: #667085;
+        --chip: var(--surface-2); --chip-on: var(--accent); --chip-on-ink: var(--on-accent); }
+}
+.gs .filters { display: grid; gap: 12px; }
+.gs .frow { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.gs .flabel { font-family: var(--font-ui); font-size: 11px; color: var(--muted); width: 108px; flex: none; }
+.gs .chip { display: inline-flex; align-items: center; gap: 6px; border: 1px solid transparent; background: var(--chip); color: var(--ink-2); border-radius: 999px; padding: 5px 11px; font: 500 13px/1 var(--font-ui); cursor: pointer; }
+.gs .chip:hover { color: var(--ink); border-color: var(--line-2); }
+.gs .chip.on { background: var(--chip-on); color: var(--chip-on-ink); }
+.gs .chip:focus-visible, .gs select:focus-visible, .gs input:focus-visible { outline: 2px solid var(--fix); outline-offset: 2px; }
+.gs .chip .n { font-size: 11px; opacity: .6; font-variant-numeric: tabular-nums; }
+.gs .dotm { width: 8px; height: 8px; border-radius: 50%; flex: none; }
+.gs select, .gs input[type=search] { font: 13px var(--font-ui); color: var(--ink); background: var(--surface); border: 1px solid var(--line-2); border-radius: 8px; padding: 6px 10px; }
+.gs input[type=search] { min-width: 220px; flex: 1; max-width: 360px; }
+.gs .clear { margin-left: auto; font-size: 13px; color: var(--ink-2); background: none; border: 0; cursor: pointer; text-decoration: underline; }
+
+.gs .kpis { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 20px; }
+@media (max-width: 900px) { .gs .kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.gs .kpi .v { font-family: var(--font-display); font-size: 28px; font-weight: 700; letter-spacing: -.02em; margin-top: 6px; }
+.gs .kpi .s { font-size: 12px; color: var(--muted); margin-top: 2px; line-height: 1.4; }
+.gs .duo-g { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 20px; }
+@media (max-width: 1000px) { .gs .duo-g { grid-template-columns: minmax(0, 1fr); } }
+.gs .duo-g .by button { grid-template-columns: 150px 1fr 90px 40px; }
+
+.gs .by { display: grid; gap: 12px; margin-top: 14px; }
+.gs .by button { all: unset; display: grid; grid-template-columns: 170px 1fr 110px 48px; align-items: center; gap: 12px; cursor: pointer; font-size: 13px; padding: 2px 0; }
+.gs .by button:hover .nm { text-decoration: underline; }
+.gs .by button.off { opacity: .35; }
+.gs .by .nm { display: flex; align-items: center; gap: 8px; }
+.gs .by .bar { height: 10px; background: var(--surface-2); border-radius: 3px; overflow: hidden; }
+.gs .by .bar i { display: block; height: 100%; border-radius: 3px; }
+.gs .by .val { text-align: right; font-weight: 600; }
+.gs .by .pc { text-align: right; color: var(--muted); font-size: 12px; }
+
+.gs .list td.desc { max-width: 380px; overflow: hidden; text-overflow: ellipsis; }
+.gs .list td.cat small, .gs .list td.meio small { display: block; color: var(--muted); font-size: 11px; }
+.gs .list th { cursor: default; }
+.gs .list th.sort { cursor: pointer; }
+.gs .list th.sort:hover { color: var(--ink); }
+.gs .list td.neg { color: var(--good); }
+.gs .list .tag { display: inline-block; font-size: 10px; padding: 1px 6px; border-radius: 4px; background: var(--surface-2); color: var(--ink-2); margin-left: 6px; font-family: var(--font-ui); }
+.gs .list .tag.re { background: rgba(var(--good-rgb), .14); color: var(--good); }
+.gs .rbtn { font: 600 12px var(--font-ui); color: var(--muted); background: none; border: 1px dashed var(--line-2); border-radius: 999px; padding: 4px 10px; cursor: pointer; white-space: nowrap; }
+.gs .rbtn:hover { color: var(--ink); border-style: solid; border-color: var(--ink-2); }
+.gs .rbtn.on { color: var(--good); border: 1px solid var(--good); background: rgba(var(--good-rgb), .10); }
+.gs .rbtn:focus-visible { outline: 2px solid var(--fix); outline-offset: 2px; }
+.gs .rbsel { font: 12px var(--font-ui); color: var(--ink-2); background: var(--surface); border: 1px solid var(--line-2); border-radius: 7px; padding: 4px 6px; }
+.gs .rbsel.on { color: var(--good); border-color: var(--good); background: rgba(var(--good-rgb), .10); font-weight: 600; }
+.gs .rb { all: unset; cursor: pointer; width: 26px; height: 26px; display: inline-grid; place-items: center; border-radius: 6px; color: var(--muted); font-size: 14px; }
+.gs .rb:hover { background: var(--surface-2); color: var(--ink); }
+.gs .rb.on { color: var(--good); background: rgba(var(--good-rgb), .14); }
+.gs .rb:focus-visible { outline: 2px solid var(--fix); }
+.rb-pop { position: absolute; z-index: 1000; width: 220px; display: grid; gap: 6px; padding: 12px; border-radius: 10px; background: var(--surface, #fff); border: 1px solid var(--line-2, #ccc); box-shadow: 0 10px 30px rgba(0,0,0,.25); font: 13px var(--font-ui); }
+.rb-pop p { margin: 0 0 4px; color: var(--ink-2, #555); }
+.rb-pop button { all: unset; cursor: pointer; padding: 8px 10px; border-radius: 7px; background: var(--surface-2, #eee); color: var(--ink, #111); }
+.rb-pop button.on { outline: 2px solid var(--good); } .rb-pop button.off { color: var(--bad); background: none; }
+.gs .list td.tipo { white-space: normal; }
+.gs .b { display: inline-block; margin: 2px 4px 2px 0; padding: 2px 8px; border-radius: 999px; font-size: 11px; font-weight: 600; white-space: nowrap; }
+.gs .b.fx { background: rgba(var(--fix-rgb), .16); color: var(--fix); }
+.gs .b.vr { background: rgba(var(--var-rgb), .16); color: var(--var); }
+.gs .b.pc { background: var(--surface-2); color: var(--ink); border: 1px solid var(--line-2); }
+.gs .b.as { background: rgba(144, 133, 233, .18); color: #7b6fe0; border: 1px solid rgba(144, 133, 233, .35); }
+.gs .b.re { background: rgba(var(--good-rgb), .14); color: var(--good); }
+.gs .more { margin-top: 12px; font: 500 13px var(--font-ui); background: var(--surface-2); color: var(--ink); border: 0; border-radius: 8px; padding: 8px 14px; cursor: pointer; }
+.gs .empty { padding: 30px; text-align: center; color: var(--muted); }
+.gs .blk table { min-width: 900px; }
+.gs .detail h2 { margin: 4px 0 0; font-size: 24px; font-weight: 700; letter-spacing: -.02em; }
+.gs .d-grid { display: grid; grid-template-columns: minmax(0, .9fr) minmax(0, 1.3fr) minmax(0, 1fr); gap: 28px; margin-top: 18px; }
+@media (max-width: 1100px) { .gs .d-grid { grid-template-columns: minmax(0, 1fr); } }
+.gs .d-stats { display: grid; gap: 14px; align-content: start; }
+.gs .d-stats .big { font-family: var(--font-display); font-size: 36px; font-weight: 700; letter-spacing: -.03em; line-height: 1; }
+.gs .d-stats .drow { display: flex; justify-content: space-between; gap: 12px; font-size: 13px; padding-top: 10px; border-top: 1px solid var(--line); }
+.gs .d-stats .drow span:first-child { color: var(--ink-2); }
+.gs .d-stats .drow b.up { color: var(--bad); } .gs .d-stats .drow b.down { color: var(--good); }
+.gs #d-trend { margin-top: 10px; width: 100%; height: auto; overflow: visible; }
+.gs #d-trend rect { fill: var(--fix); opacity: .35; cursor: pointer; }
+.gs #d-trend rect.sel, .gs #d-trend rect:hover { opacity: 1; }
+.gs #d-trend line { stroke: var(--line-2); }
+.gs #d-trend line.avg { stroke: var(--ink-2); stroke-dasharray: 3 3; }
+.gs #d-trend text { fill: var(--muted); font: 500 12px var(--font-ui); }
+.gs #d-trend text.on { fill: var(--ink); }
+.gs .fchip { display: inline-flex; align-items: center; gap: 6px; background: var(--chip-on); color: var(--chip-on-ink); border-radius: 999px; padding: 5px 6px 5px 11px; font-size: 13px; }
+.gs .fchip button { all: unset; cursor: pointer; width: 18px; height: 18px; display: grid; place-items: center; border-radius: 50%; }
+.gs .fchip button:hover { background: rgba(255,255,255,.2); }
+.gs .blk col.c-name { width: 170px; }
+.gs .lote-btn { font: 600 12px var(--font-ui); color: var(--ink); background: var(--surface); border: 1px solid var(--line-2); border-radius: 8px; padding: 7px 12px; cursor: pointer; }
+.gs .lote { margin-top: 12px; padding: 12px 14px; border: 1px solid var(--good); border-radius: 10px; background: rgba(var(--good-rgb), .06); }
+.gs .lote-t { margin: 0 0 10px; font-size: 12px; color: var(--ink-2); }
+.gs .lote-g { display: flex; gap: 12px; align-items: end; flex-wrap: wrap; }
+.gs .lote-g label { display: grid; gap: 4px; font: 500 12px var(--font-ui); color: var(--muted); }
+.gs .lote-g input { font: 13px var(--font-ui); color: var(--ink); background: var(--surface); border: 1px solid var(--line-2); border-radius: 7px; padding: 6px 8px; }
+.gs .lote-n { font-size: 13px; color: var(--ink-2); padding-bottom: 7px; }
+.gs .lote-n b { color: var(--ink); }
+.gs .lote-acts { margin-left: auto; display: flex; gap: 8px; }
+.gs .lote-acts button { font: 600 12px var(--font-ui); border: 0; border-radius: 8px; padding: 8px 12px; background: var(--good); color: #fff; cursor: pointer; }
+.gs .lote-acts button.gh { background: var(--surface); color: var(--ink); border: 1px solid var(--line-2); }
+.gs .lote-acts button:disabled { opacity: .4; cursor: default; }
+.gs td.ck, .gs th.ck { width: 28px; text-align: center; }
+.gs td.ck input, .gs th.ck input { width: 16px; height: 16px; accent-color: var(--good); cursor: pointer; }
+.gs .lote-g label.lote-mem { display: flex; gap: 6px; align-items: center; text-transform: none; font: 13px var(--font-ui); color: var(--ink); padding-bottom: 7px; max-width: 300px; flex-wrap: wrap; }
+.gs .lote-g label.lote-mem small { flex-basis: 100%; color: var(--muted); font-size: 11px; padding-left: 22px; }
+.gs .viagens { margin-top: 12px; display: flex; gap: 8px; flex-wrap: wrap; align-items: center; font-size: 12px; color: var(--muted); }
+.gs .viagens .vg { display: inline-flex; gap: 6px; align-items: center; padding: 4px 6px 4px 10px; border-radius: 999px; background: rgba(var(--good-rgb), .10); color: var(--good); font-weight: 600; }
+.gs .viagens .vg button { all: unset; cursor: pointer; color: var(--muted); padding: 0 4px; font-size: 14px; }
+.gs .viagens .vg button:hover { color: var(--bad); }
+</style>
+
+<script type="application/json" id="gs-data">{{ {"rows": extension.rows(), "meios": extension.meio_ordem(), "per": extension.periodos(), "viagens": extension.periodos_reembolso()}|tojson }}</script>
+
+<div class="rs gs" id="gs">
+  <div class="top">
+    <div><p class="eyebrow">Para onde foi o dinheiro</p><h1>Gastos</h1></div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
+      <nav class="seg" aria-label="Período" id="gs-per"></nav>
+      <nav class="seg" aria-label="Ano" id="gs-years"></nav>
+    </div>
+  </div>
+
+  <section class="card filters" aria-label="Filtros">
+    <div class="frow"><span class="flabel">Meio</span><div class="frow" id="f-meio"></div></div>
+    <div class="frow" id="row-cartao"><span class="flabel">Cartão</span><div class="frow" id="f-cartao"></div></div>
+    <div class="frow"><span class="flabel">Tipo</span><div class="frow" id="f-tipo"></div></div>
+    <div class="frow"><span class="flabel">Grupo</span><div class="frow" id="f-grupo"></div></div>
+    <div class="frow">
+      <span class="flabel">Refinar</span>
+      <span id="f-conta"></span>
+      <select id="f-mes" aria-label="Mês"></select>
+      <select id="f-cat" aria-label="Categoria"></select>
+      <input type="search" id="f-busca" placeholder="Buscar descrição (ex.: uber, ifood)" aria-label="Buscar">
+      <button class="clear" id="f-limpar" type="button">Limpar filtros</button>
+    </div>
+  </section>
+
+  <section class="card detail" id="detail" hidden>
+    <div class="blk-head">
+      <div><p class="eyebrow" id="d-eyebrow"></p><h2 id="d-title"></h2></div>
+      <button type="button" class="clear" id="d-close">Ver todos os gastos</button>
+    </div>
+    <div class="d-grid">
+      <div class="d-stats" id="d-stats"></div>
+      <div><p class="eyebrow">Evolução no ano</p><svg id="d-trend" viewBox="0 0 600 150" role="img" aria-label="Gasto na categoria em cada mês"></svg></div>
+      <div><p class="eyebrow">Onde</p><div class="rank" id="d-top"></div></div>
+    </div>
+  </section>
+
+  <section class="kpis">
+    <div class="card kpi"><p class="eyebrow">Total</p><div class="v" id="k-total"></div><div class="s" id="k-total-s"></div></div>
+    <div class="card kpi"><p class="eyebrow">Lançamentos</p><div class="v" id="k-n"></div><div class="s" id="k-n-s"></div></div>
+    <div class="card kpi"><p class="eyebrow">Ticket médio</p><div class="v" id="k-avg"></div><div class="s">por compra</div></div>
+    <div class="card kpi"><p class="eyebrow">Maior gasto</p><div class="v" id="k-max"></div><div class="s" id="k-max-s"></div></div>
+  </section>
+
+  <div class="duo-g">
+    <section class="card">
+      <p class="eyebrow">Por categoria</p>
+      <div class="by" id="by-cat"></div>
+    </section>
+    <section class="card">
+      <p class="eyebrow">Por meio de pagamento</p>
+      <div class="by" id="by-meio"></div>
+    </section>
+  </div>
+
+  <section class="card blk">
+    <div class="blk-head">
+      <div><h3>Mês a mês por meio</h3><p>Soma dos gastos filtrados em cada mês</p></div>
+    </div>
+    <div class="tw"><table id="t-mes"></table></div>
+  </section>
+
+  <section class="card blk">
+    <div class="blk-head">
+      <div><h3>Lançamentos</h3><p id="l-sub"></p></div>
+      <button type="button" class="lote-btn" id="lote-on">Marcar vários como reembolso</button>
+    </div>
+    <div class="viagens" id="viagens" hidden></div>
+    <div class="lote" id="lote" hidden>
+      <p class="lote-t">Ex.: uma viagem a trabalho. Escolha o período, desmarque o que foi seu e mande tudo de uma vez.</p>
+      <div class="lote-g">
+        <label>De<input type="date" id="lote-de"></label>
+        <label>Até<input type="date" id="lote-ate"></label>
+        <label class="lote-mem"><input type="checkbox" id="lote-mem" checked> Lembrar o período <small>o que ainda vai chegar (fatura que não fechou) também vira reembolso</small></label>
+        <label>Nome<input id="lote-nome" placeholder="ex.: Viagem SP" style="width:140px"></label>
+        <span class="lote-n" id="lote-n"></span>
+        <span class="lote-acts">
+          {% for id, nome in extension.fin_js().empresas.items() %}<button type="button" data-lote="{{ id }}">Reembolso {{ nome }}</button>
+          {% endfor %}
+          <button type="button" class="gh" id="lote-off">Cancelar</button>
+        </span>
+      </div>
+    </div>
+    <div class="tw"><table class="list" id="t-list"></table></div>
+    <button class="more" id="l-more" type="button" hidden>Mostrar todos</button>
+  </section>
+</div>

@@ -1,0 +1,115 @@
+{% include '_style.html' %}
+<style>
+.ct .accs { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 12px; }
+.ct .acc { all: unset; box-sizing: border-box; cursor: pointer; display: grid; gap: 4px; padding: 14px 16px; border-radius: 12px; background: var(--surface); border: 1px solid var(--line); position: relative; }
+.ct .acc:hover { border-color: var(--line-2); }
+.ct .acc:focus-visible { outline: 2px solid var(--fix); outline-offset: 2px; }
+.ct .acc[aria-pressed="true"] { border-color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); background: var(--accent-soft); }
+.ct .acc .k { font: 500 12px var(--font-ui); color: var(--muted); }
+.ct .acc .nm { font-weight: 600; font-size: 14px; }
+.ct .acc .v { font-family: var(--font-display); font-size: 22px; letter-spacing: -.02em; font-weight: 700; font-variant-numeric: tabular-nums; margin-top: 4px; }
+.ct .acc .v.neg { color: var(--bad); }
+.ct .acc .s { font-size: 11px; color: var(--muted); }
+.ct .acc .s .ok { color: var(--good); }
+.ct .grp { font: 600 12px var(--font-ui); color: var(--muted); margin: 18px 0 8px; }
+.ct .bar { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+.ct .bar input, .ct .bar select { font: 13px var(--font-ui); color: var(--ink); background: var(--surface); border: 1px solid var(--line-2); border-radius: 8px; padding: 7px 10px; }
+.ct .bar input[type=search] { flex: 1; min-width: 180px; }
+.ct .seg { display: inline-flex; background: var(--surface-2); border-radius: 8px; padding: 2px; }
+.ct .seg button { all: unset; cursor: pointer; font-size: 12px; padding: 5px 10px; border-radius: 6px; color: var(--ink-2); }
+.ct .seg button[aria-pressed="true"] { background: var(--surface); color: var(--ink); font-weight: 600; box-shadow: 0 1px 2px rgba(0,0,0,.08); }
+.ct .tot { display: flex; gap: 22px; flex-wrap: wrap; font-size: 13px; color: var(--ink-2); margin-top: 12px; }
+.ct .tot b { font-variant-numeric: tabular-nums; color: var(--ink); }
+.ct table.mv { width: 100%; font-size: 13px; margin-top: 8px; --table-background-even: transparent; }
+.ct table.mv td { padding: 8px; border-bottom: 1px solid var(--line) !important; vertical-align: top; }
+.ct table.mv tr.mh td { font: 600 12px var(--font-ui); color: var(--muted); padding-top: 18px; border-bottom: 1px solid var(--line-2) !important; }
+.ct table.mv tr.mh td.n { text-transform: none; letter-spacing: 0; }
+.ct table.mv td.dt { white-space: nowrap; color: var(--ink-2); font-variant-numeric: tabular-nums; width: 52px; }
+.ct table.mv td.n { text-align: right; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.ct table.mv td.v { font-weight: 600; }
+.ct table.mv td.v.in { color: var(--good); }
+.ct table.mv td.sd { color: var(--muted); }
+.ct .ds { font-weight: 500; }
+.ct .ds small { display: block; color: var(--muted); font-size: 11px; font-weight: 400; margin-top: 2px; }
+.ct .ds small.rv { color: var(--warn-ink); }
+.ct .b { display: inline-block; margin-left: 6px; padding: 1px 6px; border-radius: 999px; font-size: 10px; font-weight: 600; background: var(--surface-2); color: var(--ink-2); vertical-align: 1px; }
+.ct .b.pv { background: var(--warn-bg); color: var(--warn-ink); }
+.ct .b.tr { color: var(--muted); }
+.ct tr.fut td { opacity: .55; }
+.ct tr.ck td { font-size: 11px; color: var(--good); padding: 4px 8px; }
+.ct .empty { padding: 30px; text-align: center; color: var(--muted); }
+.ct .more { margin-top: 12px; font: 500 13px var(--font-ui); background: var(--surface-2); color: var(--ink); border: 0; border-radius: 8px; padding: 8px 14px; cursor: pointer; }
+@media (max-width: 700px) { .ct table.mv td.sd, .ct table.mv th.sd { display: none; } }
+.ct .nr { margin-top: 14px; padding: 14px; border: 1px solid var(--line); border-radius: 10px; background: var(--surface-2); }
+.ct .nr-t { margin: 0 0 10px; font-weight: 600; font-size: 13px; }
+.ct .nr-g { display: grid; grid-template-columns: 130px minmax(160px, 1.4fr) minmax(150px, 1fr) 140px minmax(140px, 1fr) auto; gap: 10px; align-items: end; }
+.ct .nr-g label { display: grid; gap: 4px; font: 500 12px var(--font-ui); color: var(--muted); }
+.ct .nr-g input, .ct .nr-g select { font: 13px var(--font-ui); color: var(--ink); background: var(--surface); border: 1px solid var(--line-2); border-radius: 8px; padding: 7px 9px; text-transform: none; letter-spacing: 0; min-width: 0; }
+.ct .nr-g .rs-in { display: flex; align-items: center; gap: 4px; background: var(--surface); border: 1px solid var(--line-2); border-radius: 8px; padding-left: 9px; font: 13px var(--font-ui); color: var(--muted); }
+.ct .nr-g .rs-in input { border: 0; padding-left: 2px; width: 100%; font-weight: 600; }
+.ct .nr-g button { font: 600 13px var(--font-ui); border: 0; border-radius: 8px; padding: 9px 16px; background: var(--accent); color: var(--on-accent); cursor: pointer; }
+.ct .nr-g button:disabled { opacity: .4; }
+.ct .nr-msg { margin: 8px 0 0; font-size: 12px; min-height: 1em; }
+.ct .nr-msg.ok { color: var(--good); } .ct .nr-msg.err { color: var(--bad); }
+.ct .b.rb { background: rgba(var(--good-rgb), .14); color: var(--good); }
+@media (max-width: 900px) { .ct .nr-g { grid-template-columns: 1fr 1fr; } }
+.ct .ds .acts { display: inline-flex; gap: 4px; margin-left: 8px; opacity: 0; transition: opacity .1s; vertical-align: 1px; }
+.ct tr:hover .ds .acts, .ct .ds .acts:focus-within { opacity: 1; }
+@media (hover: none) { .ct .ds .acts { opacity: 1; } }
+.ct .ds .acts button { all: unset; cursor: pointer; font: 600 12px var(--font-ui); color: var(--accent); padding: 1px 6px; border-radius: 5px; border: 1px solid var(--line-2); background: var(--surface); }
+.ct .ds .acts button[data-rm] { color: var(--bad); }
+.ct .ds .acts button:disabled { opacity: .4; }
+.ct tr.edrow td { background: var(--surface-2) !important; }
+.ct .edf { display: flex; gap: 10px; align-items: end; flex-wrap: wrap; }
+.ct .edf label { display: grid; gap: 4px; font: 500 12px var(--font-ui); color: var(--muted); }
+.ct .edf input { font: 13px var(--font-ui); color: var(--ink); background: var(--surface); border: 1px solid var(--line-2); border-radius: 7px; padding: 6px 8px; text-transform: none; }
+.ct .edf button { font: 600 12px var(--font-ui); border: 0; border-radius: 7px; padding: 8px 12px; background: var(--accent); color: var(--on-accent); cursor: pointer; }
+.ct .edf button.gh { background: var(--surface); color: var(--ink); border: 1px solid var(--line-2); }
+.ct .edf .em { font-size: 12px; color: var(--bad); }
+.ct .clip { all: unset; cursor: pointer; margin-left: 6px; font-size: 13px; padding: 0 3px; border-radius: 5px; vertical-align: 1px; }
+.ct .clip:hover, .ct .clip:focus-visible { background: var(--surface-2); outline: none; }
+.ct .ds .acts button[data-anx] { color: var(--ink-2); }
+.ct-lightbox { position: fixed; inset: 0; z-index: 2000; background: rgba(0,0,0,.72); display: flex; align-items: center; justify-content: center; padding: 24px; }
+.ct-lightbox .lb-in { max-width: min(900px, 96vw); max-height: 92vh; display: flex; flex-direction: column; gap: 8px; }
+.ct-lightbox img { max-width: 100%; max-height: calc(92vh - 44px); object-fit: contain; border-radius: 8px; background: #fff; }
+.ct-lightbox iframe { width: min(900px, 92vw); height: calc(92vh - 44px); border: 0; border-radius: 8px; background: #fff; }
+.ct-lightbox .lb-bar { display: flex; gap: 14px; align-items: center; color: #fff; font: 12px var(--font-ui); }
+.ct-lightbox .lb-bar span { flex: 1; opacity: .8; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ct-lightbox .lb-bar a { color: #fff; }
+.ct-lightbox .lb-bar button { all: unset; cursor: pointer; padding: 5px 10px; border-radius: 6px; background: rgba(255,255,255,.15); }
+</style>
+
+<script type="application/json" id="ct-data">{{ extension.page_json()|safe }}</script>
+
+<div class="rs ct" id="ct">
+  <div class="top"><div><p class="eyebrow">Extrato de cada conta e cartão</p><h1>Contas</h1></div></div>
+  <div id="ct-accs"></div>
+  <section class="card" id="ct-mov" style="margin-top:18px">
+    <div class="blk-head"><div><h3 id="ct-title"></h3><p id="ct-sub"></p></div></div>
+    <form class="nr" id="ct-nr" hidden autocomplete="off">
+      <p class="nr-t">Novo gasto a receber</p>
+      <div class="nr-g">
+        <label>Valor exato<span class="rs-in"><span>R$</span><input id="nr-v" inputmode="decimal" placeholder="0,00" required></span></label>
+        <label>O que foi<input id="nr-d" placeholder="ex.: almoço com cliente"></label>
+        <label>Categoria<select id="nr-c"></select></label>
+        <label>Data<input type="date" id="nr-dt"></label>
+        <label>Pago com<select id="nr-p"></select></label>
+        <button type="submit" id="nr-go">Adicionar</button>
+      </div>
+      <p class="nr-msg" id="nr-msg" role="status"></p>
+    </form>
+    <div class="bar" style="margin-top:12px">
+      <input type="search" id="ct-q" placeholder="Filtrar por descrição, categoria ou valor" aria-label="Filtrar movimentação">
+      <select id="ct-mes" aria-label="Mês"></select>
+      <select id="ct-cartao" aria-label="Cartão" hidden></select>
+      <div class="seg" role="group" aria-label="Tipo">
+        <button type="button" data-f="" aria-pressed="true">Tudo</button>
+        <button type="button" data-f="in">Entradas</button>
+        <button type="button" data-f="out">Saídas</button>
+      </div>
+    </div>
+    <div class="tot" id="ct-tot"></div>
+    <div class="tw"><table class="mv" id="ct-tab"></table></div>
+    <button class="more" id="ct-more" type="button" hidden>Mostrar mais</button>
+  </section>
+</div>

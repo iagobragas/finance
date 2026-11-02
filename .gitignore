@@ -1,0 +1,20 @@
+.venv/
+__pycache__/
+.DS_Store
+
+# Seus dados (extratos, livro, configurações, comprovantes): NUNCA vão para o git.
+# Ficam em dados/ (pasta ou link para o iCloud) ou em $FINANCE_DATA. Veja o README.
+/dados
+/dados/
+
+# gerado a partir de exemplo/statements por ./finance exemplo
+exemplo/ledger/imported.beancount
+
+# sobras de antes da separação código/dados, se aparecerem
+/config/
+/ledger/
+/statements/
+/inbox/
+/comprovantes/
+/notas/
+/legacy/

@@ -1,0 +1,145 @@
+{% include '_style.html' %}
+<style>
+.rc { --f1: #1baf7a; --f2: #2a78d6; --f3: #eda100; --f4: #e87ba4; --f5: #4a3aa7; --f-other: #98a2b3; }
+@media (prefers-color-scheme: dark) { .rc { --f1: #199e70; --f2: #3987e5; --f3: #c98500; --f4: #d55181; --f5: #9085e9; --f-other: #667085; } }
+.rc .filters { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+.rc .flabel { font: 500 12px var(--font-ui); color: var(--muted); margin-right: 4px; }
+.rc .chip { display: inline-flex; align-items: center; gap: 6px; border: 0; background: var(--surface-2); color: var(--ink-2); border-radius: 999px; padding: 6px 12px; font: 500 13px var(--font-ui); cursor: pointer; }
+.rc .chip.on { background: var(--accent); color: var(--on-accent); }
+.rc .chip:focus-visible, .rc select:focus-visible { outline: 2px solid var(--fix); outline-offset: 2px; }
+.rc select { font: 13px var(--font-ui); color: var(--ink); background: var(--surface); border: 1px solid var(--line-2); border-radius: 8px; padding: 6px 10px; }
+.rc .dotf { width: 8px; height: 8px; border-radius: 50%; flex: none; display: inline-block; }
+.rc .kpis { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 20px; }
+@media (max-width: 900px) { .rc .kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.rc .kpi .v { font-family: var(--font-display); font-size: 28px; font-weight: 700; letter-spacing: -.02em; margin-top: 6px; }
+.rc .kpi .s { font-size: 12px; color: var(--muted); margin-top: 2px; }
+.rc .duo2 { display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 1fr); gap: 20px; }
+@media (max-width: 1100px) { .rc .duo2 { grid-template-columns: minmax(0, 1fr); } }
+.rc svg { width: 100%; height: auto; display: block; overflow: visible; margin-top: 10px; }
+.rc svg .grid line { stroke: var(--line); } .rc svg .base { stroke: var(--line-2); }
+.rc svg text { fill: var(--muted); font: 500 12px var(--font-ui); }
+.rc svg text.on { fill: var(--ink); }
+.rc svg rect.seg { cursor: pointer; }
+.rc svg rect.fc { fill-opacity: .25; stroke-dasharray: 3 2; stroke-width: 1.2; }
+.rc svg rect.dim { opacity: .3; }
+.rc .legend { display: flex; gap: 14px; flex-wrap: wrap; font-size: 12px; color: var(--ink-2); }
+.rc .legend span { display: inline-flex; align-items: center; gap: 6px; }
+.rc .conc { display: grid; gap: 14px; margin-top: 14px; }
+.rc .conc .bar { display: flex; height: 14px; border-radius: 4px; overflow: hidden; gap: 2px; }
+.rc .conc .bar i { display: block; height: 100%; }
+.rc .conc .row { display: grid; grid-template-columns: minmax(0, 1fr) auto 40px; gap: 10px; font-size: 13px; align-items: center; }
+.rc .conc .row small { display: block; margin-left: 16px; }
+.rc .conc .row .pc { text-align: right; color: var(--ink-2); font-weight: 600; }
+.rc .conc .warn { font-size: 12px; color: var(--warn-ink); background: var(--warn-bg); border-radius: 8px; padding: 8px 10px; line-height: 1.5; }
+.rc .blk table.list { table-layout: auto; min-width: 760px; }
+.rc #rc-conf td:nth-child(5) { white-space: normal; min-width: 220px; }
+.rc #rc-notas td:nth-child(2) small { white-space: normal; max-width: 340px; }
+.rc .list td.desc { max-width: 380px; overflow: hidden; text-overflow: ellipsis; }
+.rc .list td small { display: block; color: var(--muted); font-size: 11px; }
+.rc .tag { display: inline-block; font: 500 12px var(--font-ui); padding: 1px 6px; border-radius: 4px; background: var(--warn-bg); color: var(--warn-ink); margin-left: 6px; }
+.rc .blk table { min-width: 900px; }
+.rc .blk col.c-name { width: 170px; }
+.rc td.fc { color: var(--ink-2); font-style: italic; background: repeating-linear-gradient(135deg, transparent 0 5px, rgba(var(--ink-rgb), .045) 5px 7px) !important; }
+.rc .mei { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr); gap: 28px; align-items: center; }
+@media (max-width: 900px) { .rc .mei { grid-template-columns: minmax(0, 1fr); } }
+.rc .mei .big { font-family: var(--font-display); font-size: 32px; font-weight: 700; letter-spacing: -.02em; margin-top: 6px; }
+.rc .mei .lim { position: relative; height: 14px; border-radius: 7px; background: var(--surface-2); overflow: hidden; margin-top: 8px; }
+.rc .mei .lim i { position: absolute; top: 0; bottom: 0; left: 0; }
+.rc .mei .lim i.real { background: var(--good); } .rc .mei .lim i.prev { background: repeating-linear-gradient(135deg, rgba(var(--good-rgb), .5) 0 4px, transparent 4px 7px); }
+.rc .mei .lim i.real.warn { background: var(--warn-ink); } .rc .mei .lim i.real.bad { background: var(--bad); }
+.rc .mei .scale { display: flex; justify-content: space-between; font: 500 12px var(--font-ui); color: var(--muted); margin-top: 4px; }
+.rc .mei ul { margin: 0; padding-left: 18px; display: grid; gap: 6px; font-size: 13px; color: var(--ink-2); line-height: 1.5; }
+.rc .mei ul b { color: var(--ink); }
+.rc .warn-t { color: var(--warn-ink); font-weight: 600; }
+.rc #rc-conf td small { display: block; white-space: normal; max-width: 260px; line-height: 1.4; }
+.rc .sal-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 16px; margin-top: 14px; }
+.rc .fonte-box { border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px; display: grid; gap: 10px; }
+.rc .fonte-box h4 { margin: 0; font-size: 15px; display: flex; justify-content: space-between; align-items: center; }
+.rc .rowf { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; font-size: 13px; color: var(--ink-2); }
+.rc input[type=number], .rc input[type=month], .rc input.desc { font: 13px var(--font-ui); color: var(--ink); background: var(--surface); border: 1px solid var(--line-2); border-radius: 7px; padding: 6px 8px; }
+.rc input[type=number] { width: 110px; text-align: right; }
+.rc input.desc { flex: 1; min-width: 160px; }
+.rc .mini-btn { all: unset; cursor: pointer; font-size: 12px; font-weight: 600; padding: 6px 10px; border-radius: 7px; background: var(--surface-2); color: var(--ink); }
+.rc .mini-btn.primary { background: var(--accent); color: var(--on-accent); }
+.rc .mini-btn:disabled { opacity: .4; cursor: default; }
+.rc .x { all: unset; cursor: pointer; color: var(--muted); padding: 2px 6px; border-radius: 5px; }
+.rc .x:hover { color: var(--bad); background: var(--surface-2); }
+.rc .sal-foot { display: flex; justify-content: flex-end; gap: 10px; align-items: center; margin-top: 14px; font-size: 12px; color: var(--muted); }
+.rc .src { border: 1px solid var(--line); border-radius: 12px; padding: 16px 18px; margin-top: 14px; display: grid; gap: 12px; }
+.rc .src-h { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; }
+.rc .src-h h4 { margin: 0; font-size: 17px; }
+.rc .src-h .prox { font: 12px var(--font-ui); color: var(--muted); }
+.rc .lane { display: grid; grid-template-columns: 150px minmax(0, 1fr); gap: 14px; align-items: center; }
+@media (max-width: 700px) { .rc .lane { grid-template-columns: minmax(0, 1fr); } }
+.rc .lane-t { font-size: 13px; font-weight: 600; } .rc .lane-t small { display: block; font-weight: 400; color: var(--muted); font-size: 11px; }
+.rc .lane-b { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.rc .chip-v { display: inline-flex; align-items: center; gap: 8px; padding: 6px 8px 6px 12px; border-radius: 9px; background: var(--surface-2); }
+.rc .chip-v small { color: var(--muted); font-size: 11px; } .rc .chip-v b { font-size: 14px; }
+.rc .chip-v.ext { background: rgba(var(--good-rgb), .12); } .rc .chip-v.ext b { color: var(--good); }
+.rc .chip-v .ed, .rc .chip-v .x { all: unset; cursor: pointer; color: var(--muted); padding: 0 4px; border-radius: 4px; font-size: 13px; }
+.rc .chip-v .ed:hover { color: var(--ink); } .rc .chip-v .x:hover { color: var(--bad); }
+.rc .arr { color: var(--muted); }
+.rc .inline { display: inline-flex; flex-wrap: wrap; gap: 6px; align-items: center; font-size: 13px; color: var(--ink-2); padding: 6px 8px; border: 1px dashed var(--line-2); border-radius: 9px; }
+.rc .muted { color: var(--muted); font-size: 13px; }
+.rc .soma { font-size: 13px; color: var(--ink-2); background: var(--surface-2); border-radius: 8px; padding: 8px 12px; }
+.rc .soma b { color: var(--ink); }
+.rc .sal-msg { color: var(--good); }
+.rc .empty { color: var(--muted); padding: 20px 0; }
+.rc .note a { color: var(--ink-2); }
+.rc .nt-st { font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 999px; white-space: nowrap; }
+.rc .nt-st.ok { background: rgba(var(--good-rgb), .14); color: var(--good); }
+.rc .nt-st.diferente, .rc .nt-st.sem_nota { background: var(--warn-bg); color: var(--warn-ink); }
+.rc .nt-st.aguardando { background: var(--surface-2); color: var(--ink-2); }
+.rc #rc-notas td small { display: block; color: var(--muted); font-size: 11px; }
+</style>
+
+<script type="application/json" id="rc-data">{{ extension.page_json()|safe }}</script>
+
+<div class="rs rc" id="rc">
+  <div class="top">
+    <div><p class="eyebrow">De onde vem o dinheiro</p><h1>Receitas</h1></div>
+    <nav class="seg" aria-label="Ano" id="rc-years"></nav>
+  </div>
+
+  <section class="card filters">
+    <span class="flabel">Fonte</span><span id="rc-fontes" style="display:contents"></span>
+    <span class="flabel" style="margin-left:12px">Mês</span><select id="rc-mes" aria-label="Mês"></select>
+  </section>
+
+  <section class="card" id="rc-sal"></section>
+  <section class="card mei" id="rc-mei"></section>
+  <section class="card" id="rc-reemb"></section>
+  <section class="card blk" id="rc-notas"></section>
+  <section class="card blk" id="rc-conf"></section>
+
+  <section class="kpis">
+    <div class="card kpi"><p class="eyebrow" id="k1-l">Recebido</p><div class="v" id="k1"></div><div class="s" id="k1-s"></div></div>
+    <div class="card kpi"><p class="eyebrow">Média por mês</p><div class="v" id="k2"></div><div class="s" id="k2-s"></div></div>
+    <div class="card kpi"><p class="eyebrow" id="k3-l">Comparado ao mês anterior</p><div class="v" id="k3"></div><div class="s" id="k3-s"></div></div>
+    <div class="card kpi"><p class="eyebrow">Previsto até dezembro</p><div class="v" id="k4"></div><div class="s" id="k4-s"></div></div>
+  </section>
+
+  <div class="duo2">
+    <section class="card">
+      <div class="chart-head" style="display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap">
+        <p class="eyebrow">Receita por mês</p>
+        <div class="legend" id="rc-legend"></div>
+      </div>
+      <svg id="rc-chart" viewBox="0 0 960 260" role="img" aria-label="Receita por mês e por fonte"></svg>
+    </section>
+    <section class="card">
+      <p class="eyebrow">Quanto depende de cada fonte</p>
+      <div class="conc" id="rc-conc"></div>
+    </section>
+  </div>
+
+  <section class="card blk">
+    <div class="blk-head"><div><h3>Mês a mês por fonte</h3><p>Meses hachurados são previsão (ajuste em <a href="../Planejamento/">Planejamento</a>)</p></div></div>
+    <div class="tw"><table id="rc-table"></table></div>
+  </section>
+
+  <section class="card blk">
+    <div class="blk-head"><div><h3>Recebimentos</h3><p id="rc-sub"></p></div></div>
+    <div class="tw"><table class="list" id="rc-list"></table></div>
+  </section>
+</div>

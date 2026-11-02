@@ -1,0 +1,54 @@
+{% include '_style.html' %}
+<style>
+.im { max-width: 1100px; }
+.im .drop { display: grid; place-items: center; gap: 10px; text-align: center; min-height: 220px; border: 2px dashed var(--line-2); border-radius: 14px; background: var(--surface); cursor: pointer; transition: border-color .15s, background .15s; padding: 28px; }
+.im .drop:hover, .im .drop:focus-visible { border-color: var(--ink-2); outline: none; }
+.im .drop.over { border-color: var(--good); background: rgba(var(--good-rgb), .08); }
+.im .drop.busy { opacity: .6; pointer-events: none; }
+.im .drop .ico { font-size: 34px; line-height: 1; color: var(--ink-2); }
+.im .drop h2 { margin: 0; font-size: 20px; font-weight: 700; }
+.im .drop p { margin: 0; color: var(--muted); font-size: 13px; }
+.im .res { display: grid; gap: 8px; }
+.im .res .it { display: grid; grid-template-columns: 24px minmax(0, 1fr) auto; gap: 10px; align-items: center; padding: 10px 12px; border-radius: 8px; background: var(--surface-2); font-size: 13px; }
+.im .res .it b { font-weight: 600; }
+.im .res .it small { display: block; color: var(--muted); font-size: 12px; margin-top: 2px; }
+.im .res .ok { color: var(--good); } .im .res .dup { color: var(--ink-2); } .im .res .bad { color: var(--bad); }
+.im .res .sum { font-size: 14px; padding: 4px 2px 8px; }
+.im .x { all: unset; cursor: pointer; font-size: 12px; color: var(--ink-2); text-decoration: underline; }
+.im .fontes { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+@media (max-width: 900px) { .im .fontes { grid-template-columns: minmax(0, 1fr); } }
+.im .fonte h3 { margin: 0; font-size: 15px; display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+.im .fonte .st { font-size: 12px; font-weight: 600; padding: 2px 8px; border-radius: 999px; }
+.im .fonte .st.ok { background: rgba(var(--good-rgb), .14); color: var(--good); }
+.im .fonte .st.late { background: var(--warn-bg); color: var(--warn-ink); }
+.im .fonte .como { font-size: 12px; color: var(--muted); margin: 6px 0 10px; line-height: 1.5; }
+.im .fonte ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; font: 12px var(--font-ui); color: var(--ink-2); max-height: 150px; overflow: auto; }
+.im .fonte li { display: flex; justify-content: space-between; gap: 8px; }
+.im .fonte li span:last-child { color: var(--muted); }
+</style>
+
+<script type="application/json" id="im-data">{{ extension.page_json()|safe }}</script>
+
+<div class="rs im" id="im">
+  <div class="top"><div><p class="eyebrow">Extratos e faturas</p><h1>Importar</h1></div></div>
+
+  <label class="drop" id="im-drop" tabindex="0" role="button" aria-label="Escolher ou arrastar arquivos">
+    <input type="file" id="im-file" multiple accept=".csv,.pdf,.ofx,.txt" hidden>
+    <span class="ico">⇪</span>
+    <h2>Arraste os extratos aqui</h2>
+    <p>ou clique para escolher · OFX do Cora e do Nubank (conta e cartão), CSV do Inter (conta e cartão) · pode soltar vários de uma vez</p>
+    <p id="im-status"></p>
+  </label>
+
+  <section class="card" id="im-res" hidden>
+    <p class="eyebrow">Resultado</p>
+    <div class="res" id="im-list"></div>
+  </section>
+
+  <section class="card" id="im-pend" hidden>
+    <p class="eyebrow">Não reconhecidos (parados na inbox)</p>
+    <div class="res" id="im-pend-list"></div>
+  </section>
+
+  <div class="fontes" id="im-fontes"></div>
+</div>

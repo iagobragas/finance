@@ -1,0 +1,348 @@
+{% set d = extension.data(request.args.get('ano'), request.args.get('mes')) %}
+{% set f = d.focus %}
+{% set p = d.periodo %}
+{% macro money(v) %}{% if v %}{{ extension.brl(v) }}{% else %}<span class="z">·</span>{% endif %}{% endmacro %}
+{% macro cells(r, heat, kind) %}
+  {% for v in r.show %}
+    {% if d.is_fc[loop.index0] %}
+    <td class="n fc"{% if v %} data-tip="{{ extension.MESES[loop.index0] }} · {{ r.name }} · previsto R$ {{ extension.brl(v, True) }}"{% endif %}>{{ money(v) }}</td>
+    {% else %}
+    <td class="n{{ ' partial' if d.partial == loop.index0 }}{{ ' focus' if f.i == loop.index0 }}"
+        {% if heat and v > 0 %}style="--h:{{ r.heat[loop.index0] }}"{% endif %}
+        {% if v %}data-tip="{{ extension.MESES[loop.index0] }} · {{ r.name }} · R$ {{ extension.brl(v, True) }}"{% endif %}>
+      {% if v %}<a href="{% if kind == 'inc' %}../Receitas/?ano={{ d.year }}&mes={{ '%02d' % loop.index }}&fonte={{ r.account|urlencode }}{% else %}../Gastos/?ano={{ d.year }}&mes={{ '%02d' % loop.index }}&conta={{ r.account|urlencode }}{% endif %}">{{ extension.brl(v) }}</a>{% else %}<span class="z">·</span>{% endif %}
+    </td>
+    {% endif %}
+  {% endfor %}
+  <td class="n tot">{{ money(r.total) }}</td>
+  <td class="n avg">{{ money(r.avg) }}</td>
+{% endmacro %}
+{% macro totals(months, cls='') %}
+  {% for v in months %}<td class="n{{ ' focus' if f.i == loop.index0 }}{{ ' fc' if d.is_fc[loop.index0] }} {{ cls }}">{{ money(v) }}</td>{% endfor %}
+{% endmacro %}
+
+{% macro colgroup() %}<colgroup><col class="c-name">{% for m in range(12) %}<col class="c-m">{% endfor %}<col class="c-t"><col class="c-t"></colgroup>{% endmacro %}
+{% macro thead() %}<thead><tr><th></th>
+  {% for m in extension.MESES %}<th class="{{ 'focus' if f.i == loop.index0 }}">{% if d.has_data[loop.index0] %}<a href="?ano={{ d.year }}&mes={{ loop.index }}">{{ m }}</a>{% else %}{{ m }}{% endif %}{% if d.partial == loop.index0 %}<small>parcial</small>{% elif d.is_fc[loop.index0] %}<small class="fc-h">previsto</small>{% endif %}</th>{% endfor %}
+  <th>Total</th><th>Média</th></tr></thead>{% endmacro %}
+
+{% include '_style.html' %}
+
+<div class="rs">
+
+  <div class="top">
+    <div><p class="eyebrow">Resumo financeiro</p><h1>{{ d.year }}</h1></div>
+    {% set sd0 = d.saldo %}
+    <div class="avail" data-tip="Soma das contas ({{ extension.fin_textos().contas }}) no último extrato importado">
+      <span>Disponível</span><b class="{{ 'neg' if sd0.total_contas < 0 }}">R$ {{ extension.brl(sd0.total_contas, True) }}</b>{% if sd0.ate %}<small>extrato até {{ sd0.ate.strftime('%d/%m') }}</small>{% endif %}
+    </div>
+    {% if d.years|length > 1 %}
+    <nav class="seg" aria-label="Ano">{% for y in d.years %}<a href="?ano={{ y }}" class="{{ 'on' if y == d.year }}">{{ y }}</a>{% endfor %}</nav>
+    {% endif %}
+  </div>
+
+  {% set total_rec = d.rec|sum %}
+  <section class="card blk">
+    <div class="blk-head">
+      <div><h3>Resultado</h3><p>Receitas menos despesas fixas e variáveis</p></div>
+      <div class="blk-sums">
+        <div class="blk-sum"><span class="v {{ 'pos' if d.res|sum >= 0 else 'neg' }}">{{ '+' if d.res|sum > 0 }}R$ {{ extension.brl(d.res|sum) }}</span><span class="p">realizado no ano</span></div>
+        {% if d.previsao.fim_ano is not none %}<div class="blk-sum fc-sum"><span class="v">{{ '+' if d.previsao.fim_ano > 0 }}R$ {{ extension.brl(d.previsao.fim_ano) }}</span><span class="p" data-tip="Soma dos resultados mensais, realizados e previstos. Não é saldo em conta: veja a previsão do saldo no card ao lado.">resultado previsto no ano</span></div>{% endif %}
+      </div>
+    </div>
+    {% set nm = d.has_data|select|list|length or 1 %}
+    {% macro vlink(v, i, kind, account) -%}
+      {%- if d.is_fc[i] -%}<a href="../Planejamento/" data-tip="Previsto · clique para ajustar no Planejamento">{{ extension.brl(v) }}</a>
+      {%- elif kind == 'inc' -%}<a href="../Receitas/?ano={{ d.year }}&mes={{ '%02d' % (i + 1) }}{% if account %}&fonte={{ account|urlencode }}{% endif %}">{{ extension.brl(v) }}</a>
+      {%- elif kind == 'grp' -%}<a href="../Gastos/?ano={{ d.year }}&mes={{ '%02d' % (i + 1) }}&grupo={{ account|urlencode }}">{{ extension.brl(v) }}</a>
+      {%- else -%}<a href="../Gastos/?ano={{ d.year }}&mes={{ '%02d' % (i + 1) }}&conta={{ account|urlencode }}">{{ extension.brl(v) }}</a>
+      {%- endif -%}
+    {%- endmacro %}
+    {% macro rrow(cls, op, name, show, months, sw, gid, kind, key, children) %}
+      <tr class="{{ cls }}">
+        <td class="op">{{ op }}</td>
+        <td class="lb"><button type="button" class="exp" data-toggle="{{ gid }}" aria-expanded="false" aria-label="Mostrar detalhes de {{ name }}"><span class="chev">›</span>{% if sw %}<i class="sw {{ sw }}"></i>{% endif %}{{ name }}</button></td>
+        {% for v in show %}<td class="n{{ ' fc' if d.is_fc[loop.index0] }}{{ ' focus' if f.i == loop.index0 and not d.is_fc[loop.index0] }}{{ ' partial' if d.partial == loop.index0 }}">{% if v %}{{ vlink(v, loop.index0, kind, key) }}{% else %}<span class="z">·</span>{% endif %}</td>{% endfor %}
+        <td class="n tot">{{ money(months|sum) }}</td>
+        <td class="n avg">{{ money((months|sum) / nm) }}</td>
+      </tr>
+      {% for r in children %}
+      <tr class="rsub" data-parent="{{ gid }}">
+        <td class="op"></td>
+        <td class="lb">{{ r.name }}</td>
+        {% for v in r.show %}<td class="n{{ ' fc' if d.is_fc[loop.index0] }}{{ ' focus' if f.i == loop.index0 and not d.is_fc[loop.index0] }}">{% if v %}{{ vlink(v, loop.index0, 'inc' if kind == 'inc' else 'acc', r.account) }}{% else %}<span class="z">·</span>{% endif %}</td>{% endfor %}
+        <td class="n tot">{{ money(r.total) }}</td>
+        <td class="n avg">{{ money(r.avg) }}</td>
+      </tr>
+      {% endfor %}
+    {% endmacro %}
+    <div class="tw"><table class="res-t">
+      <colgroup><col class="c-op"><col class="c-lb">{% for m in range(12) %}<col class="c-m">{% endfor %}<col class="c-t"><col class="c-t"></colgroup>
+      <thead><tr><th></th><th></th>
+        {% for m in extension.MESES %}<th class="{{ 'focus' if f.i == loop.index0 }}">{% if d.has_data[loop.index0] %}<a href="?ano={{ d.year }}&mes={{ loop.index }}">{{ m }}</a>{% else %}{{ m }}{% endif %}{% if d.partial == loop.index0 %}<small>parcial</small>{% elif d.is_fc[loop.index0] %}<small class="fc-h">previsto</small>{% endif %}</th>{% endfor %}
+        <th>Total</th><th>Média</th></tr></thead>
+      <tbody class="g-in">
+        {{ rrow('r-inc', '+', 'Receitas', d.rec_show, d.rec, 'inc', 'res-inc', 'inc', '', d.income) }}
+      </tbody>
+      <tbody class="g-out">
+        {{ rrow('r-fix', '−', 'Despesas fixas', d.fixas_show, d.fixas, 'fix', 'res-fix', 'grp', 'Fixas', d.sections[0].rows) }}
+        {{ rrow('r-var', '−', 'Despesas variáveis', d.variaveis_show, d.variaveis, 'var', 'res-var', 'grp', 'Variáveis', d.sections[1].rows) }}
+      </tbody>
+      <tbody class="g-res">
+        <tr class="r-res">
+          <td class="op">=</td>
+          <td class="lb">Resultado do mês</td>
+          {% for v in d.res_show %}<td class="n{{ ' focus' if f.i == loop.index0 }}">{% if v %}<a class="pill {{ 'up' if v > 0 else 'down' }}{{ ' partial' if d.partial == loop.index0 }}{{ ' fc' if d.is_fc[loop.index0] }}" href="{% if d.is_fc[loop.index0] %}../Planejamento/{% else %}?ano={{ d.year }}&mes={{ loop.index }}#foco{% endif %}" data-tip="{% if d.is_fc[loop.index0] %}Previsto · ajustar no Planejamento{% else %}Ver {{ extension.MESES[loop.index0] }} em detalhe{% endif %}">{{ '+' if v > 0 }}{{ extension.brl(v) }}</a>{% else %}<span class="z">·</span>{% endif %}</td>{% endfor %}
+          <td class="n tot"><span class="pill strong {{ 'up' if d.res|sum > 0 else 'down' }}">{{ '+' if d.res|sum > 0 }}{{ extension.brl(d.res|sum) }}</span></td>
+          <td class="n avg {{ 'pos' if d.res|sum > 0 else 'neg' }}">{{ '+' if d.res|sum > 0 }}{{ extension.brl((d.res|sum) / nm) }}</td>
+        </tr>
+        <tr class="r-acc">
+          <td class="op"></td>
+          <td class="lb">Acumulado no ano</td>
+          {% for v in d.acumulado %}<td class="n{{ ' focus' if f.i == loop.index0 }}{{ ' fc' if d.is_fc[loop.index0] }} {{ 'neg' if v is not none and v < 0 }}">{% if v is none %}<span class="z">·</span>{% else %}{{ extension.brl(v) }}{% endif %}</td>{% endfor %}
+          <td></td><td></td>
+        </tr>
+      </tbody>
+    </table></div>
+    <p class="note">Clique em <b>Receitas</b>, <b>Despesas fixas</b> ou <b>variáveis</b> para abrir as categorias; num valor para ver os lançamentos daquele mês; no resultado para ver o mês em detalhe; nos meses previstos para ajustar o plano.</p>
+  </section>
+
+  {% if d.missing_income %}
+  <div class="alert"><b>!</b><span>Sem receita importada em <b>{{ d.missing_income|join(', ') }}</b>: falta o extrato da conta PJ desses meses. O resumo do período considera só os meses com receita e já fechados ({{ p.de }}–{{ p.ate }}). Baixe o extrato e jogue em <code>statements/</code>.</span></div>
+  {% endif %}
+
+  <div class="lead" id="foco">
+    <div class="side">
+    <section class="card">
+      <div class="focus-head">
+        <div><p class="eyebrow">Resultado do mês</p><h2>{{ f.name }}{% if d.partial == f.i %} <small class="mono" style="font-size:12px;color:var(--warn-ink)">parcial</small>{% endif %}</h2></div>
+        <nav class="nav" aria-label="Mês">
+          {% set prev = namespace(i=None) %}{% for i in range(f.i) %}{% if d.has_data[i] %}{% set prev.i = i %}{% endif %}{% endfor %}
+          {% set nxt = namespace(i=None) %}{% for i in range(11, f.i, -1) %}{% if d.has_data[i] %}{% set nxt.i = i %}{% endif %}{% endfor %}
+          {% if prev.i is not none %}<a href="?ano={{ d.year }}&mes={{ prev.i + 1 }}" aria-label="Mês anterior">‹</a>{% else %}<span>‹</span>{% endif %}
+          {% if nxt.i is not none %}<a href="?ano={{ d.year }}&mes={{ nxt.i + 1 }}" aria-label="Próximo mês">›</a>{% else %}<span>›</span>{% endif %}
+        </nav>
+      </div>
+
+      <div class="result">
+        <span class="big {{ 'pos' if f.res >= 0 else 'neg' }}">{{ '+' if f.res > 0 }}R$ {{ extension.brl(f.res) }}</span>
+        <span class="sub">{% if f.rec %}{{ 'sobrou' if f.res >= 0 else 'faltou' }} · {{ '%.0f' % extension.pct(f.res|abs, f.rec) }}% da receita{% else %}sem receita importada neste mês{% endif %}</span>
+      </div>
+
+      {% if f.rec %}
+      {% set linhas = [
+        ('fix', 'Despesas fixas', f.fixas, 50, 'até'),
+        ('var', 'Despesas variáveis', f.variaveis, 30, 'até'),
+        ('save', 'Sobrou' if f.res >= 0 else 'Faltou', f.res|abs, 20, 'pelo menos'),
+      ] %}
+      <div class="goals">
+        {% for cls, nome, v, meta, regra in linhas %}
+        {% set pc = extension.pct(v, f.rec) %}
+        {% set ok = (pc <= meta) if cls != 'save' else (f.res >= 0 and pc >= meta) %}
+        <div class="goal">
+          <div class="g-top">
+            <span class="g-name"><i class="sw {{ cls if cls != 'save' else ('ok' if f.res >= 0 else 'bad') }}"></i>{{ nome }}</span>
+            <span class="g-val">R$ {{ extension.brl(v) }}</span>
+            <span class="g-pc {{ 'ok' if ok else 'off' }}">{{ '%.0f' % pc }}%</span>
+          </div>
+          <div class="g-bar" data-tip="{{ nome }}: {{ '%.0f' % pc }}% da receita · meta {{ regra }} {{ meta }}%">
+            <i class="{{ cls }}{{ ' neg' if cls == 'save' and f.res < 0 }}" style="width: {{ [pc, 100]|min }}%"></i>
+            <b style="left: {{ meta }}%"></b>
+          </div>
+          <div class="g-meta">meta: {{ regra }} {{ meta }}% da receita{% if not ok %} · <span class="off">{{ 'acima' if cls != 'save' else 'abaixo' }} da meta</span>{% endif %}</div>
+        </div>
+        {% endfor %}
+      </div>
+      <p class="ref">Receita do mês: R$ {{ extension.brl(f.rec) }}. Metas da regra 50/30/20; o traço em cada barra marca a meta.</p>
+      {% endif %}
+
+      {% set rc = d.res_chart %}
+      <div class="res-mini">
+        <p class="eyebrow">Resultado de cada mês</p>
+        <svg viewBox="0 0 {{ rc.W }} {{ rc.H }}" role="img" aria-label="Resultado de cada mês: sobra ou falta">
+          <line class="zero" x1="0" x2="{{ rc.W }}" y1="{{ rc.mid }}" y2="{{ rc.mid }}"/>
+          {% for b in rc.bars %}
+          <a href="?ano={{ d.year }}&mes={{ b.m }}">
+            <rect x="{{ b.x }}" y="{{ b.y }}" width="{{ b.w }}" height="{{ b.h }}" rx="3" class="{{ 'up' if b.pos else 'down' }}{{ ' sel' if f.i == b.m - 1 }}{{ ' partial' if b.partial }}{{ ' fc' if b.fc }}" data-tip="{{ b.tip }}"/>
+            {% if f.i == b.m - 1 %}<text x="{{ b.x + b.w / 2 }}" y="{{ b.label_y }}" text-anchor="middle" class="val">{{ b.label }}</text>{% endif %}
+          </a>
+          {% endfor %}
+          {% for l in rc.labels %}<text x="{{ l.x }}" y="{{ rc.H - 3 }}" text-anchor="middle" class="{{ 'dim' if l.dim }}{{ ' on' if f.i == loop.index0 }}">{{ l.text }}</text>{% endfor %}
+        </svg>
+      </div>
+    </section>
+
+      <section class="card periodo">
+        <p class="eyebrow">{% if p.n %}{{ p.de }}–{{ p.ate }} · {{ p.n }} {{ 'mês fechado' if p.n == 1 else 'meses fechados' }}{% else %}Ano{% endif %}</p>
+        <div class="mini">
+          <div><span>Receita</span><b>R$ {{ extension.brl(p.rec) }}</b></div>
+          <div><span>Gastos</span><b>R$ {{ extension.brl(p.fixas + p.variaveis) }}</b></div>
+          <div><span>Sobra média</span><b class="{{ 'pos' if p.media_res >= 0 else 'neg' }}">{{ '+' if p.media_res > 0 }}R$ {{ extension.brl(p.media_res) }}<small>/mês</small></b></div>
+        </div>
+        {% if d.revisar %}
+        <a class="review-link" href="../../account/Expenses:Variaveis:A-Revisar/"><span>Lançamentos sem categoria</span><b>{{ d.revisar }}</b></a>
+        {% endif %}
+      </section>
+    </div>
+
+    <div class="side">
+      {% set sd = d.saldo %}
+      <section class="card saldo">
+        <p class="eyebrow">Disponível nas contas</p>
+        <div class="result"><span class="big {{ 'neg' if sd.total_contas < 0 }}">R$ {{ extension.brl(sd.total_contas, True) }}</span></div>
+        <p class="saldo-sub">O que dá para mandar por Pix agora{% if sd.ate %}, segundo o extrato até <b>{{ sd.ate.strftime('%d/%m') }}</b>{% endif %}. O app do banco mostra o valor em tempo real.</p>
+        <div class="kv">
+          {% for c in sd.contas %}<div><span class="k">{{ c.name }}{% if c.checked %}<small class="ok" data-tip="Saldo conferido com o extrato do banco">✓ conferido</small>{% endif %}</span><span class="v">R$ {{ extension.brl(c.v, True) }}</span></div>{% endfor %}
+        </div>
+
+        <div class="liq">
+          <p class="eyebrow">Faturas a pagar</p>
+          <div class="kv">
+            {% for c in sd.cartoes %}
+            <div>
+              <span class="k">{{ c.name }}{% if c.vence %} <small>vence {{ c.vence.strftime('%d/%m') }}</small>{% endif %}{% if c.depois > 0 %}<small class="dep">+ R$ {{ extension.brl(c.depois, True) }} já lançados na fatura seguinte</small>{% endif %}</span>
+              <span class="v">R$ {{ extension.brl(c.agora if c.depois > 0 else c.a_pagar, True) }}{% if c.pendente %}<small class="pend" data-tip="A fatura de {{ c.vence.strftime('%m/%Y') }} ainda não foi importada: faltam as compras feitas depois do último fechamento.">+ compras novas</small>{% endif %}</span>
+            </div>
+            {% endfor %}
+            <div class="total"><span class="k">Total devido nos cartões<small>inclui compras das próximas faturas</small></span><span class="v">R$ {{ extension.brl(-sd.total_cartoes, True) }}</span></div>
+          </div>
+          <div class="after {{ 'neg' if sd.total < 0 else 'pos' }}">
+            <span>Se pagar todas as faturas hoje, {{ 'faltam' if sd.total < 0 else 'sobram' }}</span>
+            <b>R$ {{ extension.brl(sd.total|abs, True) }}</b>
+          </div>
+        </div>
+        {% set pv = d.previsao %}
+        {% if pv.proj %}
+        <div class="proj">
+          <p class="eyebrow">Previsão do saldo líquido</p>
+          <div class="kv">
+            <div><span class="k">Hoje <small>contas − cartões</small></span><span class="v {{ 'pos' if pv.hoje >= 0 else 'neg' }}">R$ {{ extension.brl(pv.hoje) }}</span></div>
+            {% if pv.a_receber %}<div><span class="k">Ainda entra em {{ extension.MESES[d.partial] if d.partial is not none else 'este mês' }} <small>salário + reembolsos</small></span><span class="v pos">+{{ extension.brl(pv.a_receber) }}</span></div>{% endif %}
+            {% if pv.gap %}<div><span class="k">Gastos que faltam em {{ extension.MESES[d.partial] if d.partial is not none else 'este mês' }} <small>estimativa pela média</small></span><span class="v neg">−{{ extension.brl(pv.gap) }}</span></div>{% endif %}
+            {% for x in pv.proj %}<div><span class="k">Fim de {{ x.mes|lower }}</span><span class="v {{ 'pos' if x.v >= 0 else 'neg' }}">R$ {{ extension.brl(x.v) }}</span></div>{% endfor %}
+          </div>
+          <p class="note">Saldo líquido = dinheiro nas contas menos o que se deve nos cartões (inclusive compras que só vencem no mês seguinte). <a href="#previsao">Como é calculado</a></p>
+        </div>
+        {% endif %}
+      </section>
+
+
+    </div>
+  </div>
+
+  <div class="duo">
+    <section class="card">
+      {% set c = d.chart %}
+      <div class="chart-head">
+        <p class="eyebrow">Gastos por mês</p>
+        <div class="legend"><span><i class="sw fix"></i>Fixas</span><span><i class="sw var"></i>Variáveis</span><span><i class="sw inc"></i>Receita</span></div>
+      </div>
+      <svg viewBox="0 0 {{ c.W }} {{ c.H }}" role="img" aria-label="Despesas fixas e variáveis por mês, com a receita marcada">
+        {% for col in c.cols %}{% if col.has %}<a href="?ano={{ d.year }}&mes={{ col.i }}"><rect class="col{{ ' sel' if f.i == col.i - 1 }}" x="{{ col.x }}" y="{{ c.top }}" width="{{ col.w }}" height="{{ c.base_y - c.top }}" rx="6"/></a>{% endif %}{% endfor %}
+        <g class="grid">{% for g in c.grid %}<line x1="{{ c.pad_l }}" x2="{{ c.right }}" y1="{{ g.y }}" y2="{{ g.y }}"/><text x="{{ c.pad_l - 8 }}" y="{{ g.y + 4 }}" text-anchor="end">{{ g.label }}</text>{% endfor %}</g>
+        {% for b in c.bars %}<path d="{{ b.d }}" class="{{ b.cls }}{{ ' partial' if b.partial }}{{ ' fc' if b.fc }}" data-tip="{{ b.tip }}"/>{% endfor %}
+        <line class="base" x1="{{ c.pad_l }}" x2="{{ c.right }}" y1="{{ c.base_y }}" y2="{{ c.base_y }}"/>
+        {% for m in c.marks %}<line class="rec{{ ' fc' if m.fc }}" x1="{{ m.x1 }}" x2="{{ m.x2 }}" y1="{{ m.y }}" y2="{{ m.y }}"/><line class="hit" x1="{{ m.x1 }}" x2="{{ m.x2 }}" y1="{{ m.y }}" y2="{{ m.y }}" data-tip="{{ m.tip }}"/>{% endfor %}
+        {% for l in c.labels %}<text x="{{ l.x }}" y="{{ c.H - 8 }}" text-anchor="middle" class="{{ 'dim' if l.dim }}">{{ l.text }}</text>{% endfor %}
+      </svg>
+    </section>
+
+    <section class="card">
+      <p class="eyebrow">Onde mais gastei em {{ d.year }}</p>
+      <div class="rank">
+        {% for r in d.ranking %}
+        <a href="../Gastos/?ano={{ d.year }}&conta={{ r.account|urlencode }}" class="{{ r.section }}">
+          <span class="l"><span>{{ r.name }}</span><span>R$ {{ extension.brl(r.total) }}</span></span>
+          <span class="bar"><i style="width: {{ extension.pct(r.total, d.rank_max) }}%"></i></span>
+        </a>
+        {% endfor %}
+      </div>
+    </section>
+  </div>
+
+  <div class="block-title">
+    <h2>Mês a mês</h2>
+    <p>Clique num mês para colocá-lo em foco, numa categoria com › para ver as subcategorias e num valor para ver os lançamentos.</p>
+  </div>
+
+  {% set total_rec = d.rec|sum %}
+
+  <section class="card blk">
+    <div class="blk-head">
+      <div><h3><i class="sw inc"></i>Receitas</h3><p>O que entrou pelo trabalho e outras fontes</p></div>
+      <div class="blk-sum"><span class="v">R$ {{ extension.brl(total_rec) }}</span><span class="p">no ano</span></div>
+    </div>
+    <div class="tw"><table>
+      {{ colgroup() }}{{ thead() }}
+      <tbody>
+        {% for r in d.income %}<tr class="cat"><td>{{ r.name }}</td>{{ cells(r, False, 'inc') }}</tr>{% endfor %}
+        <tr class="subtotal"><td>Total</td>{{ totals(d.rec_show) }}<td class="n tot">{{ money(total_rec) }}</td><td class="n avg">{{ money(total_rec / (d.rec|select|list|length or 1)) }}</td></tr>
+      </tbody>
+    </table></div>
+  </section>
+
+  {% for s in d.sections %}
+  {% set outer = loop %}
+  <section class="card blk">
+    <div class="blk-head">
+      <div><h3><i class="sw {{ 'fix' if s.key == 'fixas' else 'var' }}"></i>{{ s.title }}</h3><p>{{ s.hint }}</p></div>
+      <div class="blk-sum"><span class="v">R$ {{ extension.brl(s.total.total) }}</span><span class="p">{% if total_rec %}{{ '%.0f' % extension.pct(s.total.total, total_rec) }}% da receita do ano{% else %}no ano{% endif %}</span></div>
+    </div>
+    <div class="tw"><table>
+      {{ colgroup() }}{{ thead() }}
+      <tbody>
+        {% for r in s.rows %}
+          {% set gid = outer.index ~ '-' ~ loop.index %}
+          <tr class="cat{{ ' has-subs' if r.subs }}{{ ' review' if r.review }}" data-group="{{ gid }}"><td>{{ r.name }}</td>{{ cells(r, True, s.key) }}</tr>
+          {% for sub in r.subs %}<tr class="sub" data-parent="{{ gid }}"><td>{{ sub.name }}</td>{{ cells(sub, True, s.key) }}</tr>{% endfor %}
+        {% endfor %}
+        <tr class="subtotal"><td>Total</td>{{ totals(s.total.show) }}<td class="n tot">{{ money(s.total.total) }}</td><td class="n avg">{{ money(s.total.avg) }}</td></tr>
+      </tbody>
+    </table></div>
+  </section>
+  {% endfor %}
+
+
+
+  {% set pv = d.previsao %}
+  {% if pv.months %}
+  <section class="card" id="previsao">
+    <div class="blk-head">
+      <div><h3>Como a previsão é calculada</h3><p>Meses previstos: {% for m in pv.months %}{{ extension.MESES[m] }}{{ ', ' if not loop.last }}{% endfor %}. Ajuste em <code>config/forecast.yaml</code>; a página recalcula ao salvar.</p></div>
+    </div>
+    <div class="how">
+      <div>
+        <p class="eyebrow">Regras</p>
+        <ul>
+          <li><b>Receitas:</b> as com valor fixo no Planejamento usam esse valor; as outras pela média de {{ pv.base }}.</li>
+          <li><b>Fixas e variáveis:</b> média de {{ pv.base }} por categoria, sem contar parcelas.</li>
+          <li><b>Parcelas:</b> valor exato das parcelas que faltam das compras já feitas.</li>
+          <li><b>Mês atual:</b> o que falta importar é estimado pela média (entra só no saldo previsto).</li>
+          <li><b>Por que o resultado do ano (+R$ {{ extension.brl(pv.fim_ano) }}) não bate com o saldo previsto?</b> O resultado soma o que entrou menos o que saiu em cada mês, e ainda faltam extratos: conta PF antes de 29/06 e os Pix para contas suas que não são importadas (Transferências). O saldo previsto parte do dinheiro real de hoje. Quanto mais extratos entrarem, mais os dois se aproximam.</li>
+          {% if pv.extras %}<li><b>Extras:</b> {% for x in pv.extras %}{{ x.desc }} (R$ {{ extension.brl(x.valor) }} em {{ extension.MESES[x.mes] }}){{ ', ' if not loop.last }}{% endfor %}</li>{% endif %}
+        </ul>
+      </div>
+      <div>
+        <p class="eyebrow">Parcelas que ainda vão cair · R$ {{ extension.brl(pv.parcelas_total, True) }}</p>
+        <div class="kv">
+          {% for x in pv.parcelas %}<div><span class="k">{{ extension.MESES[x.mes] }} · {{ x.desc }} <small>{{ x.parcela }}</small></span><span class="v">R$ {{ extension.brl(x.valor, True) }}</span></div>{% else %}<div><span class="k">Nenhuma parcela futura.</span></div>{% endfor %}
+        </div>
+      </div>
+    </div>
+  </section>
+  {% endif %}
+
+  <section class="card">
+    <p class="eyebrow">Extratos importados</p>
+    <div class="cov-w">
+    <div class="cov">
+      <span></span>{% for m in extension.MESES %}<span class="m">{{ m }}</span>{% endfor %}
+      {% for c in d.coverage %}
+        <span>{{ c.name }}</span>
+        {% for n in c.months %}<span class="c">{% if n %}<i class="dot" data-tip="{{ c.name }} · {{ extension.MESES[loop.index0] }} · {{ n }} lançamentos"></i>{% else %}<i class="hole" data-tip="{{ c.name }} · {{ extension.MESES[loop.index0] }} · nenhum lançamento"></i>{% endif %}</span>{% endfor %}
+      {% endfor %}
+    </div>
+    </div>
+    <p class="note">Círculo tracejado = nenhum lançamento daquela conta no mês. Se você usou a conta, falta baixar o extrato.</p>
+  </section>
+</div>

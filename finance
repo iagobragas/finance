@@ -1,0 +1,8 @@
+#!/bin/sh
+# Atalho: ./finance [build|check]
+cd "$(dirname "$0")" || exit 1
+if [ ! -x .venv/bin/python ]; then
+  echo "Criando ambiente Python (.venv)…"
+  python3.11 -m venv .venv && .venv/bin/pip install -q -r requirements.txt || exit 1
+fi
+exec .venv/bin/python -m app.cli "$@"

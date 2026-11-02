@@ -1,0 +1,7 @@
+# Reembolsos: gastos que uma empresa devolve junto com o pagamento.
+# Editado pela aba Gastos (botão "reembolsável") e pela aba Lançar. Pode editar à mão.
+
+# Parte fixa de cada pagamento. O que vier acima disso quita os reembolsos pendentes daquela empresa.
+base:
+  Income:Trabalho:Acme: 5000.0
+gastos: []

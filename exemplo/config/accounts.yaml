@@ -1,0 +1,63 @@
+# Contas de origem: qual conta do livro recebe os lançamentos de cada tipo de extrato.
+# Se abrir uma conta nova (outro banco/cartão), adicione aqui e crie o parser em app/parsers.py.
+sources:
+  inter_pf: Assets:Inter:PF               # conta corrente pessoa física (CSV "Extrato Conta Corrente")
+  cora_pj: Assets:Cora:PJ                 # conta PJ / MEI (CSV ou OFX)
+  inter_card: Liabilities:Cartao:Inter    # fatura do cartão Inter (PDF ou CSV)
+  nubank_card: Liabilities:Cartao:Nubank  # fatura do Nubank (OFX ou CSV)
+
+# Conta "ponte" para dinheiro que só muda de lugar (PJ -> PF, pagamento de fatura, Pix para si mesmo).
+# Não é gasto nem receita; o saldo dela deve ficar perto de zero.
+transfer_account: Assets:Transferencias
+
+# Destino de quem nenhuma regra reconheceu.
+unmatched:
+  outflow: Expenses:Variaveis:A-Revisar
+  inflow: Income:Outras:A-Revisar
+
+# Nome de cada cartão pelos 4 últimos dígitos que aparecem na fatura (filtros da aba Gastos).
+cards:
+  "1234": Inter físico
+  "5678": Inter virtual
+
+# Fechamento e vencimento de cada cartão (aba Ciclo: em que fatura e em que ciclo cada compra é paga).
+card_cycles:
+  Liabilities:Cartao:Inter: {fecha: 7, vence: 15}
+  Liabilities:Cartao:Nubank: {fecha: 7, vence: 14}
+
+# Ciclo financeiro: do dia `inicio` de um mês até a véspera no mês seguinte (16 -> 15, depois dos vencimentos).
+ciclo:
+  inicio: 16
+
+# MEI: limite de faturamento anual, dia e valor do DAS. Confirme os valores vigentes com o contador.
+mei:
+  limite_anual: 81000
+  das_dia: 20
+  das_valor: 86.05
+  das_conta: Expenses:Fixas:Impostos
+
+# Dia em que cada empresa paga. Fim de semana ou feriado: vale o próximo dia útil.
+pagamentos:
+  Income:Trabalho:Acme: {dia: 5}
+
+# Empresas que pagam você e podem reembolsar gastos: nome da conta (sem acento, como em
+# Income:Trabalho:<nome> e Assets:Reembolsos:<nome>) -> nome para exibir.
+empresas:
+  Acme: Acme
+
+# Nomes de exibição extras para subcontas (sem acento no livro -> como aparece nas telas).
+nomes:
+  Mae: Mãe
+
+# Feriados além dos nacionais que atrasam pagamentos (MM-DD todo ano, ou AAAA-MM-DD).
+feriados_extras: []
+
+# Contas importadas por OFX (qualquer banco): número da conta (aparece no arquivo) -> conta do livro.
+# tipo = nome usado nas regras (source:), pasta = onde o arquivo é guardado em statements/.
+ofx_contas: {}
+#  "12345678-9": {conta: Assets:Nubank:Conta, tipo: nubank_conta, pasta: nubank-conta, nome: Conta Nubank PF}
+#  "<id da fatura>": {conta: Liabilities:Cartao:Nubank, tipo: nubank_card, pasta: nubank-cartao, nome: Cartão Nubank, cartao: true, meio: Crédito Nubank}
+
+# Notas fiscais (NFS-e) emitidas pelo MEI: CNPJ do tomador -> fonte de receita.
+tomadores: {}
+#  "00000000000100": {fonte: Income:Trabalho:Acme, exige_nota: true}

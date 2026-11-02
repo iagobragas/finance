@@ -1,0 +1,25 @@
+;; Livro principal. Abra no Fava com ./finance
+option "title" "Finanças - Exemplo"
+option "operating_currency" "BRL"
+option "name_assets" "Assets"
+option "name_liabilities" "Liabilities"
+option "name_income" "Income"
+option "name_expenses" "Expenses"
+option "name_equity" "Equity"
+
+;; Cria automaticamente as contas usadas nas regras (não precisa declarar "open" para cada uma)
+plugin "beancount.plugins.auto_accounts"
+
+2000-01-01 custom "fava-option" "language" "pt"
+2000-01-01 custom "fava-option" "locale" "pt_BR"
+2000-01-01 custom "fava-option" "default-page" "extension/Resumo/"
+2000-01-01 custom "fava-option" "invert-income-liabilities-equity" "true"
+2000-01-01 custom "fava-option" "show-accounts-with-zero-balance" "false"
+2000-01-01 custom "fava-option" "show-accounts-with-zero-transactions" "false"
+2000-01-01 custom "fava-option" "auto-reload" "true"
+
+;; Página inicial com o ano inteiro (app/fava_resumo)
+2000-01-01 custom "fava-extension" "app.fava_resumo"
+
+include "imported.beancount"   ; gerado a partir dos extratos
+include "manual.beancount"     ; seus lançamentos manuais

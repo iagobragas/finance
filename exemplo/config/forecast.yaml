@@ -1,0 +1,14 @@
+# Plano de previsão. Editado pela aba Planejamento do Finance.
+# Pode editar à mão também; a página recalcula ao recarregar.
+meses_base: 3
+horizonte: 6
+receitas:
+  Income:Trabalho:Acme:
+    modo: fixo
+    valor: 5000.0
+categorias: {}
+compromissos: []
+metas:
+  investir: 15
+extras: []
+extras_receita: []

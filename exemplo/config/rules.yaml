@@ -1,0 +1,50 @@
+# Regras de categorização. A PRIMEIRA regra que casar vence, então as mais específicas vêm antes.
+#
+#   match:   expressão regular (sem diferenciar maiúsculas) aplicada à descrição do extrato
+#   account: conta de destino (contrapartida)
+#   source:  opcional - só aplica a um tipo de extrato (inter_pf, cora_pj, inter_card, nubank_card, nubank_conta)
+#   sign:    opcional - "in" (entrada) ou "out" (saída) na conta de origem
+#
+# Estrutura das categorias:
+#   Income:Trabalho:*      receitas do trabalho (uma subconta por empresa)
+#   Income:Outras:*        rendimentos, presentes, não identificadas
+#   Expenses:Fixas:*       o que se repete todo mês e é difícil cortar rápido
+#   Expenses:Variaveis:*   o que muda mês a mês e dá para controlar
+#
+# Tudo que não casar vai para Expenses:Variaveis:A-Revisar / Income:Outras:A-Revisar.
+# Regras criadas na aba Pendências ficam em rules_user.yaml e têm prioridade.
+
+rules:
+  # ---------------------------------------------------------------- transferências entre contas suas
+  - {match: 'PAGTO DEBITO AUTOMATICO|PAGAMENTO ON LINE|DEB AUT PARCIAL', account: Assets:Transferencias}
+  - {match: '^Pagamento recebido$', account: Assets:Transferencias, source: nubank_card}
+  - {match: 'nu ?pagamentos|nubank', account: Liabilities:Cartao:Nubank, source: inter_pf, sign: out}
+  - {match: 'Pagamento Fatura|Fatura cart[aã]o Inter', account: Liabilities:Cartao:Inter, source: inter_pf}
+  - {match: 'Pix No Cr[eé]dito|PIX CRED A VISTA', account: Assets:Transferencias}
+  # Pix para você mesmo (troque pelo seu nome e CNPJ):
+  - {match: 'SEU NOME COMPLETO|00\.?000\.?000', account: Assets:Transferencias}
+
+  # ---------------------------------------------------------------- receitas
+  - {match: 'ACME LTDA', account: Income:Trabalho:Acme, source: cora_pj, sign: in}
+  - {match: 'RENDIMENTO|REMUNERACAO', account: Income:Outras:Rendimentos, sign: in}
+
+  # ---------------------------------------------------------------- fixas
+  - {match: 'Receita Federal|Simples Nacional|MINISTERIO DA FAZENDA', account: Expenses:Fixas:Impostos}   # DAS do MEI
+  - {match: 'ALUGUEL|CONDOMINIO', account: Expenses:Fixas:Moradia}
+  - {match: 'NETFLIX|SPOTIFY|APPLE\.COM|GOOGLE \*|AMAZON PRIME', account: Expenses:Fixas:Assinaturas}
+  - {match: 'VIVO|CLARO|TIM ', account: Expenses:Fixas:Celular}
+  - {match: 'FACULDADE|UNIVERSIDADE|ESCOLA', account: Expenses:Fixas:Educacao}
+
+  # ---------------------------------------------------------------- variáveis
+  - {match: 'IOF|TARIFA|JUROS', account: Expenses:Variaveis:Tarifas}
+  - {match: 'UBER|99APP|99 TECNOLOGIA', account: Expenses:Variaveis:Transporte:Uber}
+  - {match: 'POSTO|IPIRANGA|SHELL', account: Expenses:Variaveis:Transporte:Combustivel}
+  - {match: 'PEDAGIO|SEM PARAR|CONECTCAR', account: Expenses:Variaveis:Transporte:Pedagio}
+  - {match: 'ESTACIONAMEN|PARK', account: Expenses:Variaveis:Transporte:Estacionamento}
+  - {match: 'LATAM|GOL LINHAS|AZUL|HOTEL|BOOKING|AIRBNB', account: Expenses:Variaveis:Viagem}
+  - {match: 'MERCADOLIVRE|AMAZON|SHOPEE', account: Expenses:Variaveis:Compras:Online}
+  - {match: 'SUPERMERC|MERCADO|CARREFOUR|ATACAD|HORTIFRUTI|PADARIA', account: Expenses:Variaveis:Mercado}
+  - {match: 'FARMACIA|DROGARIA|DROGASIL|RAIA', account: Expenses:Variaveis:Saude}
+  - {match: 'CINEMA|INGRESSO|SYMPLA|EVENTIM', account: Expenses:Variaveis:Lazer}
+  - {match: 'IFD\*|IFOOD|RAPPI', account: Expenses:Variaveis:Delivery}
+  - {match: 'PIZZ|BURG|RESTAUR|CAFE|COFFEE|\bBAR\b|BOTECO|LANCH|STARBUCKS', account: Expenses:Variaveis:Restaurantes}

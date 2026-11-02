@@ -1,0 +1,87 @@
+{% include '_style.html' %}
+<style>
+.ln { max-width: 880px; }
+.ln .form { display: grid; gap: 18px; }
+.ln .tipo { display: inline-flex; gap: 2px; padding: 3px; background: var(--surface-2); border-radius: 10px; width: max-content; }
+.ln .tipo button { all: unset; cursor: pointer; padding: 8px 18px; border-radius: 8px; font-weight: 600; font-size: 14px; color: var(--ink-2); }
+.ln .tipo button.on { background: var(--surface); color: var(--ink); box-shadow: 0 1px 2px rgba(0,0,0,.1); }
+.ln .tipo button.on[data-t="despesa"] { color: var(--bad); } .ln .tipo button.on[data-t="receita"] { color: var(--good); }
+.ln .main { display: grid; grid-template-columns: 220px minmax(0, 1fr); gap: 12px; }
+@media (max-width: 700px) { .ln .main { grid-template-columns: minmax(0, 1fr); } }
+.ln input, .ln select { font: 15px var(--font-ui); color: var(--ink); background: var(--surface); border: 1px solid var(--line-2); border-radius: 10px; padding: 12px 14px; width: 100%; box-sizing: border-box; font-variant-numeric: tabular-nums; }
+.ln input:focus, .ln select:focus { outline: 2px solid var(--fix); outline-offset: 1px; border-color: transparent; }
+.ln .valor { position: relative; }
+.ln .valor span { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: var(--muted); font-size: 15px; }
+.ln .valor input { padding-left: 42px; font-size: 22px; font-weight: 700; }
+.ln label.f { display: grid; gap: 6px; font-size: 12px; color: var(--ink-2); }
+.ln .row2 { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); gap: 12px; }
+@media (max-width: 700px) { .ln .row2 { grid-template-columns: minmax(0, 1fr); } }
+.ln .auto { font-size: 11px; color: var(--good); margin-left: 6px; }
+.ln .pays { display: flex; gap: 8px; flex-wrap: wrap; }
+.ln .pays button { all: unset; cursor: pointer; padding: 8px 14px; border-radius: 999px; background: var(--surface-2); color: var(--ink-2); font-size: 13px; font-weight: 500; }
+.ln .pays button.on { background: var(--accent); color: var(--on-accent); }
+.ln .pays button:focus-visible, .ln .tipo button:focus-visible { outline: 2px solid var(--fix); outline-offset: 2px; }
+.ln .more summary { cursor: pointer; font-size: 13px; color: var(--ink-2); }
+.ln .more .row2 { margin-top: 12px; }
+.ln .actions { display: flex; align-items: center; gap: 14px; }
+.ln .go { font: 600 15px var(--font-ui); border: 0; border-radius: 10px; padding: 12px 22px; cursor: pointer; background: var(--accent); color: var(--on-accent); }
+.ln .go:disabled { opacity: .4; cursor: default; }
+.ln .msg { font-size: 13px; }
+.ln .msg.ok { color: var(--good); } .ln .msg.err { color: var(--bad); }
+.ln .prov { font-size: 12px; color: var(--muted); line-height: 1.5; }
+.ln .list td small { color: var(--muted); font-size: 11px; display: block; }
+.ln .list .x { background: none; border: 0; color: var(--muted); cursor: pointer; font-size: 18px; padding: 2px 8px; border-radius: 6px; }
+.ln .list .x:hover { color: var(--bad); background: var(--surface-2); }
+.ln .tag { display: inline-block; font: 500 12px var(--font-ui); padding: 1px 6px; border-radius: 4px; background: var(--warn-bg); color: var(--warn-ink); margin-left: 6px; }
+.ln td.v.rec { color: var(--good); }
+.ln .hint-re { margin: 2px 0 0; font-size: 12px; color: var(--good); }
+.ln .blk table.list, .rs .ln-tw table.list { table-layout: auto; min-width: 640px; }
+.rs .ln-tw { overflow-x: auto; }
+</style>
+
+<script type="application/json" id="ln-data">{{ extension.page_json()|safe }}</script>
+
+<div class="rs ln" id="ln">
+  <div class="top"><div><p class="eyebrow">Sem extrato? Lance aqui</p><h1>Lançar</h1></div></div>
+
+  <section class="card">
+    <form class="form" id="ln-form" autocomplete="off">
+      <div class="tipo" role="radiogroup" aria-label="Tipo">
+        <button type="button" data-t="despesa" class="on" role="radio" aria-checked="true">Despesa</button>
+        <button type="button" data-t="receita" role="radio" aria-checked="false">Receita</button>
+      </div>
+
+      <div class="main">
+        <div class="valor"><span>R$</span><input id="ln-valor" inputmode="decimal" placeholder="0,00" aria-label="Valor" required></div>
+        <input id="ln-desc" placeholder="O que foi? (ex.: almoço, uber, presente)" aria-label="Descrição">
+      </div>
+
+      <div class="row2">
+        <label class="f">Categoria <span id="ln-auto" class="auto" hidden>sugerida</span><select id="ln-cat" aria-label="Categoria"></select></label>
+        <label class="f">Data<input type="date" id="ln-data-in" aria-label="Data"></label>
+      </div>
+
+      <div class="f" style="display:grid;gap:6px;font-size:12px;color:var(--ink-2)"><span id="ln-pay-l">Pago com</span><div class="pays" id="ln-pays"></div></div>
+
+      <div class="f" id="ln-re-box" style="display:grid;gap:6px;font-size:12px;color:var(--ink-2)"><span>Reembolsável? <i style="color:var(--muted)">(a empresa devolve junto com o pagamento)</i></span><div class="pays" id="ln-re"></div><p class="hint-re" id="ln-re-hint" hidden></p></div>
+
+      <details class="more">
+        <summary>Mais opções</summary>
+        <div class="row2">
+          <label class="f">Parcelas<input type="number" id="ln-parc" min="1" max="48" value="1"></label>
+        </div>
+      </details>
+
+      <div class="actions">
+        <button class="go" id="ln-go" type="submit">Lançar</button>
+        <span class="msg" id="ln-msg" role="status"></span>
+      </div>
+      <p class="prov" id="ln-prov" hidden>Fica como <b>provisório</b>: quando o extrato ou a fatura trouxer o mesmo valor, este lançamento é trocado pelo do banco automaticamente.</p>
+    </form>
+  </section>
+
+  <section class="card blk">
+    <div class="blk-head"><div><h3>Lançados à mão</h3><p id="ln-sub"></p></div></div>
+    <div class="tw ln-tw"><table class="list" id="ln-list"></table></div>
+  </section>
+</div>

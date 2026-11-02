@@ -1,0 +1,573 @@
+{% set d = extension.data(request.args.get('c')) %}
+{% set cur = d.cur %}
+{% macro dm(x) %}{{ x.strftime('%d/%m') }}{% endmacro %}
+{% include '_style.html' %}
+<style>
+.cy .hero { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); gap: 20px; }
+@media (max-width: 1000px) { .cy .hero { grid-template-columns: minmax(0, 1fr); } }
+.cy .livre .big { font-family: var(--font-display); font-size: clamp(44px, 5vw, 64px); font-weight: 700; letter-spacing: -.03em; line-height: 1; margin: 14px 0 6px; }
+.cy .livre .sub { font-size: 15px; color: var(--ink-2); }
+.cy .livre .sub b { color: var(--ink); }
+.cy .pace { display: grid; gap: 12px; margin-top: 24px; }
+.cy .pace .lbl { display: flex; justify-content: space-between; font-size: 12px; color: var(--ink-2); margin-bottom: 5px; }
+.cy .pace .bar { height: 10px; border-radius: 5px; background: var(--surface-2); overflow: hidden; }
+.cy .pace .bar i { display: block; height: 100%; border-radius: 5px; }
+.cy .pace .bar i.t { background: var(--ink-2); opacity: .5; }
+.cy .pace .bar i.g { background: var(--fix); } .cy .pace .bar i.g.fast { background: var(--bad); }
+.cy .flag { margin-top: 14px; padding: 10px 12px; border-radius: 8px; font-size: 13px; line-height: 1.5; }
+.cy .flag.ok { background: rgba(var(--good-rgb), .12); color: var(--good); }
+.cy .flag.bad { background: rgba(var(--bad-rgb), .12); color: var(--bad); }
+.cy .livre { display: flex; flex-direction: column; }
+.cy .daily { margin-top: 20px; }
+.cy .daily .lbl { display: flex; justify-content: space-between; gap: 10px; font-size: 12px; color: var(--ink-2); margin-bottom: 6px; flex-wrap: wrap; }
+.cy .daily svg { width: 100%; height: auto; display: block; overflow: visible; }
+.cy .daily rect { fill: var(--fix); opacity: .8; } .cy .daily rect.over { fill: var(--bad); }
+.cy .daily .orc { stroke: var(--ink-2); stroke-dasharray: 4 3; } .cy .daily .base { stroke: var(--line-2); }
+.cy .daily .hj { stroke: var(--ink); stroke-width: 1.5; }
+.cy .daily text { font: 500 12px var(--font-ui); fill: var(--muted); } .cy .daily text.hjt { fill: var(--ink); }
+.cy .next { margin-top: auto; padding-top: 18px; display: grid; gap: 6px; }
+.cy .next .ev { display: grid; grid-template-columns: 52px 1fr auto; gap: 10px; font-size: 13px; padding: 7px 0; border-top: 1px solid var(--line); }
+.cy .next .dt { font: 12px var(--font-ui); color: var(--muted); }
+.cy .next .ev.in .vv { color: var(--good); font-weight: 600; } .cy .next .ev.due .vv { color: var(--bad); font-weight: 600; }
+.cy .next .ev.close .tx { color: var(--ink-2); }
+.cy .conta .line { display: grid; grid-template-columns: 22px 1fr auto; gap: 8px; align-items: baseline; padding: 9px 0; border-bottom: 1px solid var(--line); font-size: 14px; }
+.cy .conta .line .op { font-family: var(--font-ui); color: var(--muted); text-align: center; }
+.cy .conta .line .v { font-weight: 600; font-variant-numeric: tabular-nums; }
+.cy .conta .line small { display: block; font-size: 12px; color: var(--muted); margin-top: 2px; }
+.cy .conta .line.total { border-bottom: 0; border-top: 2px solid var(--line-2); font-weight: 700; font-size: 16px; padding-top: 12px; }
+.cy .conta .line.total .op { color: var(--ink); }
+.cy .conta .sub-i { font-size: 12px; color: var(--ink-2); display: flex; justify-content: space-between; padding: 2px 0 0 30px; }
+.cy .conta .note { margin-top: 10px; }
+.cy .tl .tl-scroll { overflow-x: auto; }
+.cy .tl svg { width: 100%; min-width: 860px; height: auto; display: block; overflow: visible; }
+.cy .tl .track { stroke: var(--line-2); stroke-width: 2; }
+.cy .tl .past { stroke: var(--ink-2); stroke-width: 4; stroke-linecap: round; }
+.cy .tl circle.in { fill: var(--good); } .cy .tl circle.in.no { fill: var(--surface); stroke: var(--good); stroke-width: 2; stroke-dasharray: 2 2; }
+.cy .tl rect.due { fill: var(--bad); } .cy .tl rect.close { fill: var(--ink-2); }
+.cy .tl text { fill: var(--ink-2); font: 12px var(--font-ui); }
+.cy .tl text.d { fill: var(--muted); font: 500 12px var(--font-ui); }
+.cy .tl .lead { stroke: var(--line-2); stroke-width: 1; stroke-dasharray: 2 3; }
+.cy .tl rect.imp { fill: var(--fix); } .cy .tl rect.imp.ok { fill: var(--good); } .cy .tl rect.imp.late { fill: var(--warn-ink); }
+.cy .tl text.ico { fill: #fff; font: 700 12px var(--font-ui); pointer-events: none; }
+.cy .tl text.imp-t { fill: var(--fix); font-weight: 600; } .cy .tl text.imp-t.late { fill: var(--warn-ink); }
+.cy .tl .today line { stroke: var(--ink); stroke-width: 2; } .cy .tl .today text { fill: var(--ink); font-weight: 700; }
+.cy .spend { display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 1fr); gap: 28px; margin-top: 14px; }
+@media (max-width: 1000px) { .cy .spend { grid-template-columns: minmax(0, 1fr); } }
+.cy .rank .fixa i { background: var(--fix); } .cy .rank .var i { background: var(--var); }
+.cy .meio-l { display: grid; gap: 8px; margin-top: 12px; font-size: 13px; }
+.cy .meio-l div { display: flex; justify-content: space-between; border-bottom: 1px solid var(--line); padding-bottom: 6px; }
+.cy .hist td { padding: 9px 8px; }
+.cy .hist tr.sel td { background: var(--surface-2) !important; }
+.cy .hist td a { color: inherit; text-decoration: none; }
+.cy .hist td a:hover { text-decoration: underline; }
+.cy .mtx { min-width: 1150px; }
+.cy .mtx th small { display: block; font-size: 9px; letter-spacing: 0; text-transform: none; color: var(--muted); }
+.cy .mtx th a { text-decoration: none; } .cy .mtx th a:hover { color: var(--ink); }
+.cy .btn-link { font-size: 13px; font-weight: 600; color: var(--ink); text-decoration: none; padding: 6px 12px; border-radius: 8px; background: var(--surface-2); }
+.cy .btn-link:hover { background: var(--line); }
+.cy .hchart { width: 100%; height: auto; display: block; overflow: visible; margin: 14px 0 6px; }
+.cy .hchart .zero { stroke: var(--line-2); }
+.cy .hchart rect { opacity: .75; } .cy .hchart a:hover rect, .cy .hchart rect.sel { opacity: 1; }
+.cy .hchart rect.up { fill: var(--good); } .cy .hchart rect.down { fill: var(--bad); }
+.cy .hchart rect.part { fill-opacity: .15; stroke-width: 1.5; stroke-dasharray: 3 2; }
+.cy .hchart rect.part.up { stroke: var(--good); } .cy .hchart rect.part.down { stroke: var(--bad); }
+.cy .hchart rect.inc { opacity: .35; }
+.cy .hchart rect.sel { stroke: var(--ink); stroke-width: 2; }
+.cy .hchart text { font: 500 12px var(--font-ui); fill: var(--muted); }
+.cy .hchart text.v { fill: var(--ink-2); }
+.cy .hist { table-layout: fixed; min-width: 900px; }
+.cy .hist th small { display: block; font-size: 9px; letter-spacing: 0; text-transform: none; color: var(--muted); }
+.cy .hist td { padding: 10px 8px; vertical-align: middle; }
+.cy .hist td small { display: block; font-size: 11px; color: var(--muted); margin-top: 2px; }
+.cy .hist td small.pos { color: var(--good); } .cy .hist td small.neg { color: var(--bad); }
+.cy .hist tr.avg td { font-weight: 600; color: var(--ink-2); background: var(--surface-2) !important; }
+.cy .hist tr.dim td { opacity: .55; }
+.cy .hist .tag { display: inline-block; margin: 4px 4px 0 0; font: 500 12px var(--font-ui); padding: 1px 6px; border-radius: 4px; background: var(--surface-2); color: var(--ink-2); }
+.cy .hist .tag.warn { background: var(--warn-bg); color: var(--warn-ink); }
+.cy .hist .tag.good { background: rgba(var(--good-rgb), .14); color: var(--good); }
+.cy .hist .tag.bad { background: rgba(var(--bad-rgb), .14); color: var(--bad); }
+.cy .split2 { display: flex; height: 5px; border-radius: 3px; overflow: hidden; gap: 1px; margin: 5px 0 0 auto; width: 120px; }
+.cy .split2 i { display: block; height: 100%; } .cy .split2 .c { background: var(--ink-2); } .cy .split2 .o { background: var(--line-2); }
+.cy .lg { display: inline-block; width: 8px; height: 5px; border-radius: 2px; margin: 0 3px 0 6px; vertical-align: 1px; }
+.cy .delta { font-weight: 600; }
+.cy .px-top { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
+.cy .px-tg { display: inline-flex; align-items: center; gap: 8px; font: inherit; font-size: 12px; color: var(--ink-2); background: var(--surface-2); border: 1px solid var(--line); border-radius: 999px; padding: 5px 10px 5px 6px; cursor: pointer; }
+.cy .px-tg .sw { width: 26px; height: 15px; border-radius: 8px; background: var(--line-2); position: relative; transition: background .15s; }
+.cy .px-tg .sw::after { content: ""; position: absolute; top: 2px; left: 2px; width: 11px; height: 11px; border-radius: 50%; background: var(--surface); transition: transform .15s; }
+.cy .px-tg[aria-pressed="true"] .sw { background: var(--fix); } .cy .px-tg[aria-pressed="true"] .sw::after { transform: translateX(11px); }
+.cy.modo-media .px-m:not(.m-media), .cy.modo-plano .px-m:not(.m-plano), .cy.modo-nada .px-m:not(.m-nada) { display: none !important; }
+.cy .px-seg { display: inline-flex; background: var(--surface-2); border: 1px solid var(--line); border-radius: 999px; padding: 2px; }
+.cy .px-seg button { font: inherit; font-size: 12px; color: var(--ink-2); background: none; border: 0; border-radius: 999px; padding: 4px 10px; cursor: pointer; }
+.cy .px-seg button[aria-pressed="true"] { background: var(--accent); color: var(--on-accent); }
+.cy .px-fut { margin-top: 18px; }
+.cy .px-fut-l { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 4px; }
+.cy .px-fut-l .pf { flex: 0 0 auto; display: grid; gap: 2px; min-width: 72px; padding: 7px 10px; border-radius: 8px; border: 1px solid var(--line); text-decoration: none; color: var(--ink-2); font-size: 11px; }
+.cy .px-fut-l .pf b { font-size: 13px; font-variant-numeric: tabular-nums; } .cy .px-fut-l .pf.sel { border-color: var(--accent); background: var(--surface-2); }
+@media (max-width: 560px) { .cy .px-dois { grid-template-columns: minmax(0, 1fr) !important; } }
+.cy .px-dois { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 18px; }
+.cy .px-dois div { background: var(--surface-2); border-radius: 8px; padding: 10px 12px; display: grid; gap: 2px; }
+.cy .px-dois span, .cy .px-dois small { font-size: 12px; color: var(--muted); } .cy .px-dois b { font-size: 20px; }
+.cy .px-itens { margin-top: 16px; } .cy .px-itens .sub-i { font-size: 12px; color: var(--ink-2); display: flex; justify-content: space-between; gap: 10px; padding: 3px 0; border-top: 1px solid var(--line); }
+.cy .px-itens .sub-i small { color: var(--muted); margin-left: 4px; }
+.cy .past-sum { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px; }
+.cy .past-sum .v { font-family: var(--font-display); font-size: 32px; font-weight: 700; letter-spacing: -.02em; margin-top: 6px; }
+.cy .ck { margin-top: 14px; border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; }
+.cy .ck.late { border-color: var(--warn-ink); background: var(--warn-bg); }
+.cy .ck-h { display: flex; gap: 12px; align-items: baseline; flex-wrap: wrap; font-size: 13px; }
+.cy .ck-h span { color: var(--muted); }
+.cy .ck-h a { margin-left: auto; font-weight: 600; font-size: 13px; color: var(--accent); text-decoration: none; }
+.cy .ck ul { list-style: none; margin: 10px 0 0; padding: 0; display: grid; gap: 2px; }
+.cy .ck li { display: grid; grid-template-columns: 18px minmax(120px, 160px) 40px 1fr auto; gap: 10px; align-items: baseline; font-size: 13px; padding: 5px 0; border-top: 1px solid var(--line); }
+.cy .ck li:first-child { border-top: 0; }
+.cy .ck li .st { color: var(--muted); } .cy .ck li.ok .st { color: var(--good); font-weight: 700; }
+.cy .ck li .nm { font-weight: 600; } .cy .ck li.ok .nm { color: var(--ink-2); font-weight: 500; }
+.cy .ck li .fm { font: 600 12px var(--font-ui); background: var(--surface-2); color: var(--ink-2); border-radius: 4px; padding: 2px 5px; text-align: center; }
+.cy .ck li .cm { color: var(--muted); font-size: 12px; }
+.cy .ck li .at { color: var(--muted); font-size: 12px; font-variant-numeric: tabular-nums; white-space: nowrap; }
+@media (max-width: 700px) { .cy .ck li { grid-template-columns: 18px 1fr auto; } .cy .ck li .cm, .cy .ck li .fm { display: none; } }
+.cy .cc-res tr.res td { font-weight: 700; }
+.cy .cc-res td.pos { color: var(--good); } .cy .cc-res td.neg { color: var(--bad); }
+.cy .cc-res tr.sep td { padding: 4px 0; border: 0 !important; }
+.cy .cc-res td.part { opacity: .5; }
+</style>
+
+<div class="rs cy{{ ' modo-media' if d.is_next }}">
+  <div class="top">
+    <div>
+      <p class="eyebrow">{{ 'Ciclo atual' if d.is_current else ('Próximo ciclo' if d.prox.k == 1 else d.prox.k ~ ' ciclos à frente') ~ ' · prévia' if d.is_next else 'Ciclo' }} {% set tx = extension.fin_textos() %}{% if tx.dias %} · pago com a receita dos dias {{ tx.dias }}{% endif %}</p>
+      <h1>{{ dm(d.start) }} → {{ dm(d.end) }}</h1>
+    </div>
+    <nav class="nav" aria-label="Ciclos">
+      {% if d.prev_key %}<a href="?c={{ d.prev_key }}" aria-label="Ciclo anterior">‹</a>{% else %}<span>‹</span>{% endif %}
+      {% if not d.is_current %}<a href="./" style="width:auto;padding:0 10px">Atual</a>{% endif %}
+      {% if d.next_key %}<a href="?c={{ d.next_key }}" aria-label="Próximo ciclo">›</a>{% else %}<span>›</span>{% endif %}
+    </nav>
+  </div>
+
+  {% if d.is_next %}
+  {% set p = d.prox %}
+  <div class="hero">
+    <section class="card livre">
+      <div class="px-top">
+        <p class="eyebrow">Sobra prevista no fim do ciclo ({{ dm(d.end) }})</p>
+        <div class="px-seg" id="px-modo" role="group" aria-label="Gastos novos">
+          <button type="button" data-modo="media" title="Média dos seus gastos variáveis nos últimos 3 meses">Média</button>
+          <button type="button" data-modo="plano" title="Valores que você definiu no Planejamento">Planejamento</button>
+          <button type="button" data-modo="nada" title="Sem nenhum gasto além dos que já estão lançados">Nenhum</button>
+        </div>
+      </div>
+      <div class="px-m m-media">
+        <div class="big {{ 'pos' if p.com_ritmo >= 0 else 'neg' }}">R$ {{ extension.brl(p.com_ritmo) }}</div>
+        <p class="sub">se você gastar no seu ritmo médio (≈ R$ {{ extension.brl(p.media_var + p.media_fix) }} por mês em variáveis e fixas sem valor certo)</p>
+      </div>
+      <div class="px-m m-plano">
+        <div class="big {{ 'pos' if p.com_plano >= 0 else 'neg' }}">R$ {{ extension.brl(p.com_plano) }}</div>
+        <p class="sub">gastando o que está no <a href="../Planejamento/">Planejamento</a> (≈ R$ {{ extension.brl(p.plano_var) }} por mês em variáveis{% if p.plano_itens %} + compromissos{% endif %})</p>
+      </div>
+      <div class="px-m m-nada">
+        <div class="big {{ 'pos' if p.certo >= 0 else 'neg' }}">R$ {{ extension.brl(p.certo) }}</div>
+        <p class="sub">se você não fizer mais nenhum gasto além dos que já estão aqui</p>
+      </div>
+      <div class="px-dois">
+        <div class="px-m m-media m-plano"><span>Só com o que já é certo</span><b class="{{ 'pos' if p.certo >= 0 else 'neg' }}">R$ {{ extension.brl(p.certo) }}</b><small>antes de qualquer compra nova</small></div>
+        <div class="px-m m-nada"><span>No seu ritmo médio</span><b class="{{ 'pos' if p.com_ritmo >= 0 else 'neg' }}">R$ {{ extension.brl(p.com_ritmo) }}</b><small>com ≈ R$ {{ extension.brl(p.ritmo) }} de gastos novos</small></div>
+        {% if p.k == 1 %}<div><span>Já no cartão para este ciclo</span><b>R$ {{ extension.brl(p.a_pagar) }}</b><small>compras feitas depois do último fechamento</small></div>
+        {% else %}<div><span>Certo neste ciclo</span><b>R$ {{ extension.brl(p.a_parcelas + p.a_assinar + p.fixas + p.a_pagar) }}</b><small>parcelas, assinaturas e DAS</small></div>{% endif %}
+      </div>
+      {% if p.k == 1 %}<p class="flag ok" style="margin-top:16px">Compras no cartão de hoje até o fechamento ({{ dm(p.faturas|map(attribute='fecha')|min) if p.faturas else '07' }}) caem aqui e vão aparecendo nas faturas ao lado conforme você importa ou lança.</p>
+      {% else %}<p class="flag ok" style="margin-top:16px">Parte da sobra do ciclo anterior ({{ dm(d.prev_end) }}). A opção escolhida acima (média, planejamento ou nenhum gasto novo) vale para todos os ciclos até aqui.</p>{% endif %}
+      <div class="px-fut">
+        <p class="eyebrow">Sobra no fim de cada ciclo · até a última parcela</p>
+        <div class="px-fut-l">
+          <a href="./" class="pf"><span>{{ extension.MESES[d.cur_end.month - 1] }}/{{ d.cur_end.year % 100 }}</span><b>atual</b></a>
+          {% for x in d.fut %}<a href="?c={{ x.key }}" class="pf{{ ' sel' if x.sel }}" data-tip="{{ x.nome }} · parcelas R$ {{ extension.brl(x.parcelas) }}"><span>{{ x.nome }}</span>
+            <b class="px-m m-media {{ 'pos' if x.com_ritmo >= 0 else 'neg' }}">{{ extension.brl(x.com_ritmo) }}</b><b class="px-m m-plano {{ 'pos' if x.com_plano >= 0 else 'neg' }}">{{ extension.brl(x.com_plano) }}</b><b class="px-m m-nada {{ 'pos' if x.certo >= 0 else 'neg' }}">{{ extension.brl(x.certo) }}</b></a>{% endfor %}
+        </div>
+      </div>
+      {% for f in p.faturas if f.itens %}
+      <div class="px-itens">
+        <p class="eyebrow">{{ f.name }} · fatura de {{ dm(f.due) }}</p>
+        {% for i in f.itens %}<div class="sub-i"><span>{{ dm(i.date) }} · {{ i.desc }} <small>{{ i.cat }}</small></span><span>R$ {{ extension.brl(i.v, True) }}</span></div>{% endfor %}
+        {% if f.outros %}<div class="sub-i"><span>Pix no crédito / ajustes</span><span>R$ {{ extension.brl(f.outros, True) }}</span></div>{% endif %}
+      </div>
+      {% endfor %}
+    </section>
+
+    <section class="card conta">
+      <p class="eyebrow">Como chego nesse número</p>
+      <div class="line"><span class="op"></span><span>Sobra do ciclo {{ 'atual' if p.k == 1 else 'anterior' }}<small>prevista para {{ dm(d.prev_end) }} · <a href="?c={{ d.prev_key }}">ver esse ciclo</a></small></span><span class="v"><span class="px-m m-media">R$ {{ extension.brl(p.ini_ritmo, True) }}</span><span class="px-m m-plano">R$ {{ extension.brl(p.ini_plano, True) }}</span><span class="px-m m-nada">R$ {{ extension.brl(p.ini_certo, True) }}</span></span></div>
+      <div class="line"><span class="op">+</span><span>Vai entrar até {{ dm(d.end) }}</span><span class="v pos">{{ extension.brl(p.a_receber, True) }}</span></div>
+      {% for r in p.receber %}<div class="sub-i"><span>{{ r.name }} · ~{{ dm(r.date) }}</span><span>{{ extension.brl(r.v, True) }}</span></div>{% endfor %}
+      {% if p.a_pagar or p.k == 1 %}
+      <div class="line"><span class="op">−</span><span>Faturas que vencem no ciclo<small>só o que já foi lançado no cartão (parcelas e assinaturas vêm abaixo)</small></span><span class="v neg">{{ extension.brl(p.a_pagar, True) }}</span></div>
+      {% for f in p.faturas %}<div class="sub-i"><span>{{ f.name }} · vence {{ dm(f.due) }} · fecha {{ dm(f.fecha) }}</span><span>{{ extension.brl(f.v, True) }}</span></div>{% endfor %}
+      {% endif %}
+      {% if p.a_assinar %}
+      <div class="line"><span class="op">−</span><span>Assinaturas<small>entram nas faturas deste ciclo · <a href="../Planejamento/#pl-ass-card">cancelou alguma?</a></small></span><span class="v neg">{{ extension.brl(p.a_assinar, True) }}</span></div>
+      {% for x in p.assinaturas %}<div class="sub-i"><span>{{ x.nome }} · {{ dm(x.date) }}</span><span>{{ extension.brl(x.v, True) }}</span></div>{% endfor %}
+      {% endif %}
+      {% if p.a_parcelas %}
+      <div class="line"><span class="op">−</span><span>Parcelas<small>compras já feitas, valor exato</small></span><span class="v neg">{{ extension.brl(p.a_parcelas, True) }}</span></div>
+      {% for x in p.parcelas %}<div class="sub-i"><span>{{ x.nome|title }} · {{ x.parcela }} · {{ dm(x.date) }}</span><span>{{ extension.brl(x.v, True) }}</span></div>{% endfor %}
+      {% endif %}
+      {% if p.fixas %}
+      <div class="line"><span class="op">−</span><span>Contas fixas fora do cartão</span><span class="v neg">{{ extension.brl(p.fixas, True) }}</span></div>
+      {% for f in p.fixas_fora %}<div class="sub-i"><span>{{ f.name }} {{ '(valor da guia)' if f.fixo else '(média)' }}</span><span>{{ extension.brl(f.v, True) }}</span></div>{% endfor %}
+      {% endif %}
+      <div class="line total px-m m-nada"><span class="op">=</span><span>Sobra sem gastos novos</span><span class="v {{ 'pos' if p.certo >= 0 else 'neg' }}">R$ {{ extension.brl(p.certo, True) }}</span></div>
+      <div class="line total px-m m-media"><span class="op">=</span><span>Antes dos gastos novos</span><span class="v {{ 'pos' if p.antes_ritmo >= 0 else 'neg' }}">R$ {{ extension.brl(p.antes_ritmo, True) }}</span></div>
+      <div class="line px-m m-media"><span class="op">−</span><span>Gastos novos no ritmo médio<small>média de R$ {{ extension.brl(p.media_var) }}/mês em variáveis{% if p.media_fix %} + R$ {{ extension.brl(p.media_fix) }} em fixas sem valor certo ({{ p.fix_nomes|join(', ')|replace('Educacao', 'Educação') }}){% endif %}, menos R$ {{ extension.brl(p.ja_var + p.ja_fix) }} já no cartão · estimativa</small></span><span class="v neg">{{ extension.brl(p.ritmo, True) }}</span></div>
+      <div class="line total px-m m-media"><span class="op">=</span><span>Sobra prevista</span><span class="v {{ 'pos' if p.com_ritmo >= 0 else 'neg' }}">R$ {{ extension.brl(p.com_ritmo, True) }}</span></div>
+      <div class="line total px-m m-plano"><span class="op">=</span><span>Antes dos gastos novos</span><span class="v {{ 'pos' if p.antes_plano >= 0 else 'neg' }}">R$ {{ extension.brl(p.antes_plano, True) }}</span></div>
+      <div class="line px-m m-plano"><span class="op">−</span><span>Gastos pelo Planejamento<small>R$ {{ extension.brl(p.plano_var) }}/mês em variáveis{% if p.plano_fix %} + R$ {{ extension.brl(p.plano_fix) }} em fixas sem valor certo{% endif %}, menos R$ {{ extension.brl(p.ja_var + p.ja_fix) }} já no cartão{% if not p.plano_cats and not p.plano_itens %} · nada definido ainda, igual à média · <a href="../Planejamento/">definir</a>{% endif %}</small></span><span class="v neg">{{ extension.brl(p.plano, True) }}</span></div>
+      {% for c in p.plano_cats %}<div class="sub-i px-m m-plano"><span>{{ c.name }} · {{ 'valor fixo' if c.modo == 'fixo' else ('% da receita' if c.modo == 'pct' else 'ajuste') }} (média R$ {{ extension.brl(c.media) }})</span><span>{{ extension.brl(c.previsto, True) }}</span></div>{% endfor %}
+      {% for x in p.plano_itens %}<div class="sub-i px-m m-plano"><span>{{ x.nome }}</span><span>{{ extension.brl(x.v, True) }}</span></div>{% endfor %}
+      <div class="line total px-m m-plano"><span class="op">=</span><span>Sobra prevista</span><span class="v {{ 'pos' if p.com_plano >= 0 else 'neg' }}">R$ {{ extension.brl(p.com_plano, True) }}</span></div>
+      <p class="note">Prévia: muda conforme você lança ou importa gastos. Não conta reembolsos novos nem gastos fixos que ainda não apareceram (ex.: mensalidade paga por você).</p>
+    </section>
+  </div>
+  {% else %}
+
+  {% if cur %}
+  <div class="hero">
+    <section class="card livre">
+      <p class="eyebrow">Sobra no fim do ciclo ({{ dm(d.end) }})</p>
+      <div class="big {{ 'pos' if cur.livre >= 0 else 'neg' }}">R$ {{ extension.brl(cur.livre) }}</div>
+      <p class="sub">{% if cur.livre > 0 %}≈ <b>R$ {{ extension.brl(cur.por_dia) }} por dia</b> nos {{ cur.dias }} dias que faltam{% else %}Não sobra nada neste ciclo: o que entrar já está comprometido.{% endif %}</p>
+      {% set abertas = cur.faturas|selectattr('aberta')|list %}
+      <p class="sub" style="margin-top:4px;font-size:12px;color:var(--muted)">{% if abertas %}Pix e débito reduzem a sobra na hora; compras no cartão até {{ dm(abertas|map(attribute='fecha')|min) }} também, porque entram nas faturas deste ciclo.{% else %}Pix e débito reduzem a sobra na hora. As faturas deste ciclo já fecharam: compras no cartão a partir de agora vão para a fatura de {{ extension.MESES[(d.end.month) % 12]|lower }} e saem do caixa do próximo ciclo.{% endif %}</p>
+
+      <div class="pace">
+        <div><div class="lbl"><span>Tempo do ciclo</span><span>{{ '%.0f' % cur.tempo }}%</span></div><div class="bar"><i class="t" style="width: {{ cur.tempo }}%"></i></div></div>
+        <div><div class="lbl"><span>Gasto no ciclo (R$ {{ extension.brl(cur.gasto) }} de R$ {{ extension.brl(cur.gasto + [cur.livre, 0]|max) }})</span><span>{{ '%.0f' % cur.progresso }}%</span></div>
+          <div class="bar"><i class="g{{ ' fast' if cur.progresso > cur.tempo + 5 }}" style="width: {{ [cur.progresso, 100]|min }}%"></i></div></div>
+      </div>
+      {% set dd = d.diario %}
+      {% if dd %}
+      <div class="daily">
+        <div class="lbl"><span>Gasto por dia</span><span>linha: <b>R$ {{ extension.brl(dd.orc) }}/dia</b> cabe no ciclo{% if dd.estourou %} · {{ dd.estourou }} {{ 'dia passou' if dd.estourou == 1 else 'dias passaram' }}{% endif %}</span></div>
+        <svg viewBox="0 0 {{ dd.W }} {{ dd.H }}" role="img" aria-label="Gasto por dia no ciclo">
+          {% for b in dd.bars %}<rect x="{{ b.x }}" y="{{ b.y }}" width="{{ b.w }}" height="{{ b.h }}" rx="1.5" class="{{ 'over' if b.over }}" data-tip="{{ b.tip }}"/>{% endfor %}
+          <line class="orc" x1="0" x2="{{ dd.W }}" y1="{{ dd.orc_y }}" y2="{{ dd.orc_y }}"/>
+          <line class="base" x1="0" x2="{{ dd.W }}" y1="{{ dd.base }}" y2="{{ dd.base }}"/>
+          <line class="hj" x1="{{ dd.hoje_x }}" x2="{{ dd.hoje_x }}" y1="4" y2="{{ dd.base }}"/>
+          <text x="0" y="{{ dd.H - 2 }}">{{ dd.ini }}</text><text x="{{ dd.hoje_x }}" y="{{ dd.H - 2 }}" text-anchor="middle" class="hjt">hoje</text><text x="{{ dd.W }}" y="{{ dd.H - 2 }}" text-anchor="end">{{ dd.fim }}</text>
+        </svg>
+      </div>
+      {% endif %}
+
+      {% if cur.progresso > cur.tempo + 5 %}
+      <p class="flag bad">Você já usou {{ '%.0f' % cur.progresso }}% do que tinha para o ciclo, mas só passaram {{ '%.0f' % cur.tempo }}% dos dias. Nesse ritmo falta dinheiro antes do dia {{ d.end.day }}.</p>
+      {% else %}
+      <p class="flag ok">Ritmo dentro do ciclo: gasto ({{ '%.0f' % cur.progresso }}%) acompanhando o tempo ({{ '%.0f' % cur.tempo }}%).</p>
+      {% endif %}
+
+      {% if d.proximos %}
+      <div class="next">
+        <p class="eyebrow">Próximos marcos</p>
+        {% for e in d.proximos %}
+        <div class="ev {{ e.k }}"><span class="dt">{{ dm(e.d) }}</span><span class="tx">{{ e.t }}</span><span class="vv">{% if e.v is not none %}{{ '+' if e.k == 'in' else '−' }}R$ {{ extension.brl(e.v) }}{% endif %}</span></div>
+        {% endfor %}
+      </div>
+      {% endif %}
+    </section>
+
+    <section class="card conta">
+      <p class="eyebrow">Como chego nesse número</p>
+      <div class="line"><span class="op"></span><span>Tem nas contas hoje<small>{{ extension.fin_textos().contas }}, extrato até {{ dm(d.saldo_ate) if d.saldo_ate else '—' }}</small></span><span class="v">R$ {{ extension.brl(cur.saldo, True) }}</span></div>
+      <div class="line"><span class="op">+</span><span>Vai entrar até {{ dm(d.end) }}</span><span class="v pos">{{ extension.brl(cur.a_receber, True) }}</span></div>
+      {% for r in cur.receber %}<div class="sub-i"><span>{{ r.name }} · ~{{ dm(r.date) }}</span><span>{{ extension.brl(r.v, True) }}</span></div>{% endfor %}
+      <div class="line"><span class="op">−</span><span>Faturas que vencem no ciclo</span><span class="v neg">{{ extension.brl(cur.a_pagar, True) }}</span></div>
+      {% for f in cur.faturas %}<div class="sub-i"><span>{{ f.name }} · vence {{ dm(f.due) }}{% if f.aberta %} · <i>ainda aberta, fecha {{ dm(f.fecha) }}</i>{% endif %}</span><span>{{ extension.brl(f.v, True) }}</span></div>{% endfor %}
+      {% if cur.fixas %}
+      <div class="line"><span class="op">−</span><span>Contas fixas fora do cartão</span><span class="v neg">{{ extension.brl(cur.fixas, True) }}</span></div>
+      {% for f in cur.fixas_fora %}<div class="sub-i"><span>{{ f.name }} {{ '(valor da guia)' if f.fixo else '(média)' }}</span><span>{{ extension.brl(f.v, True) }}</span></div>{% endfor %}
+      {% endif %}
+      {% if cur.a_assinar %}
+      <div class="line"><span class="op">−</span><span>Assinaturas que ainda vão cobrar<small>entram na fatura deste ciclo · <a href="../Planejamento/#pl-ass-card">cancelou alguma?</a></small></span><span class="v neg">{{ extension.brl(cur.a_assinar, True) }}</span></div>
+      {% for x in cur.assinaturas %}<div class="sub-i"><span>{{ x.nome }} · {{ dm(x.date) }}</span><span>{{ extension.brl(x.v, True) }}</span></div>{% endfor %}
+      {% endif %}
+      {% if cur.a_parcelas %}
+      <div class="line"><span class="op">−</span><span>Parcelas que ainda vão cair<small>compras já feitas, valor exato</small></span><span class="v neg">{{ extension.brl(cur.a_parcelas, True) }}</span></div>
+      {% for x in cur.parcelas %}<div class="sub-i"><span>{{ x.nome|title }} · {{ x.parcela }} · {{ dm(x.date) }}</span><span>{{ extension.brl(x.v, True) }}</span></div>{% endfor %}
+      {% endif %}
+      <div class="line"><span class="op">−</span><span>Guardar<small>{% if cur.guardar %}{{ cur.meta_pct }}% do salário do ciclo (sem reembolsos) + investimentos combinados{% else %}sem meta definida · <a href="../Planejamento/">definir no Planejamento</a>{% endif %}</small></span><span class="v">{{ extension.brl(cur.guardar, True) }}</span></div>
+      <div class="line total"><span class="op">=</span><span>Sobra no fim do ciclo</span><span class="v {{ 'pos' if cur.livre >= 0 else 'neg' }}">R$ {{ extension.brl(cur.livre, True) }}</span></div>
+      <p class="note">Compras no cartão até o fechamento{% if extension.fin_textos().fecha %} (dia {{ extension.fin_textos().fecha }}){% endif %} já entram nas faturas acima.{% if cur.comprometido %} Já comprometido no próximo ciclo: R$ {{ extension.brl(cur.comprometido) }}.{% endif %} <a href="?c={{ d.next_key }}">Ver o próximo ciclo</a>.</p>
+    </section>
+  </div>
+  {% else %}
+  <section class="card past-sum">
+    <div><p class="eyebrow">Entrou no ciclo</p><div class="v">R$ {{ extension.brl(d.sel.entradas) }}</div></div>
+    <div><p class="eyebrow">Saiu no ciclo</p><div class="v">R$ {{ extension.brl(d.sel.saidas) }}</div><p class="note">faturas R$ {{ extension.brl(d.sel.saidas_cartao) }} · Pix/débito R$ {{ extension.brl(d.sel.saidas_outras) }}</p></div>
+    <div><p class="eyebrow">Resultado</p><div class="v {{ 'pos' if d.sel.entradas >= d.sel.saidas else 'neg' }}">{{ '+' if d.sel.entradas > d.sel.saidas }}R$ {{ extension.brl(d.sel.entradas - d.sel.saidas) }}</div><p class="note">{{ 'O que entrou pagou o que venceu.' if d.sel.entradas >= d.sel.saidas else 'O que entrou não pagou tudo que venceu.' }}</p></div>
+  </section>
+  {% endif %}
+
+  {% set t = d.timeline %}
+  <section class="card tl">
+    <p class="eyebrow">Linha do tempo do ciclo</p>
+    {% set Y = {'u2': (22, 36), 'u1': (58, 72), 'd1': (122, 136), 'd2': (158, 172)} %}
+    <div class="tl-scroll"><svg viewBox="0 0 {{ t.W }} 180" role="img" aria-label="Datas do ciclo: receitas, fechamentos, vencimentos e dias de importar">
+      <line class="track" x1="20" x2="{{ t.W - 20 }}" y1="95" y2="95"/>
+      {% if t.today %}<line class="past" x1="20" x2="{{ t.today }}" y1="95" y2="95"/>{% endif %}
+      {% if not (t.marks|selectattr('d', 'equalto', d.start)|list) %}<text class="d" x="20" y="112" text-anchor="start">{{ dm(d.start) }}</text>{% endif %}
+      {% if not (t.marks|selectattr('d', 'equalto', d.end)|list) %}<text class="d" x="{{ t.W - 20 }}" y="112" text-anchor="end">{{ dm(d.end) }}</text>{% endif %}
+      {% for m in t.marks %}
+        {% set ly = Y[m.lane] %}
+        {% set up = m.lane.startswith('u') %}
+        <line class="lead" x1="{{ m.x }}" x2="{{ m.x }}" y1="{{ ly[1] + 4 if up else 103 }}" y2="{{ 87 if up else ly[0] - 12 }}"/>
+        {% if m.k == 'in' %}<circle class="in{{ '' if m.ok else ' no' }}" cx="{{ m.x }}" cy="95" r="7"/>
+        {% elif m.k == 'imp' %}<a href="../Importar/"><rect class="imp{{ ' late' if m.late }}{{ ' ok' if m.ok }}" x="{{ m.x - 8 }}" y="87" width="16" height="16" rx="4" data-tip="{{ m.tip }}{{ ' · atrasado, clique para importar' if m.late else '' }}"/><text class="ico" x="{{ m.x }}" y="99" text-anchor="middle">↓</text></a>
+        {% else %}<rect class="{{ m.k }}" x="{{ m.x - 5 }}" y="90" width="10" height="10" rx="2" transform="rotate(45 {{ m.x }} 95)"/>{% endif %}
+        <text x="{{ m.x }}" y="{{ ly[0] if up else ly[1] }}" text-anchor="{{ m.anchor or 'middle' }}" class="{{ 'imp-t' if m.k == 'imp' }}{{ ' late' if m.late }}">{{ m.t }}</text>
+        <text class="d" x="{{ m.x }}" y="{{ ly[1] if up else ly[0] }}" text-anchor="{{ m.anchor or 'middle' }}">{{ m.dl or dm(m.d) }}</text>
+      {% endfor %}
+      {% if t.today %}<g class="today"><line x1="{{ t.today }}" x2="{{ t.today }}" y1="82" y2="108"/><text x="{{ t.today }}" y="{{ 60 }}" text-anchor="middle">hoje</text></g>{% endif %}
+    </svg></div>
+    <p class="note">● receita (vazado = ainda não entrou) · ◆ cinza = fechamento da fatura · ◆ vermelho = vencimento · <b style="color:var(--fix)">↓</b> dia de importar (clique para abrir a aba Importar).</p>
+    {% set ck = t.checklist %}
+    {% if ck %}
+    <div class="ck{{ ' late' if ck.late }}{{ ' done' if ck.feito }}">
+      <div class="ck-h">
+        <b>{% if ck.feito %}✓ Importação de {{ dm(ck.d) }} feita{% elif ck.late %}Importação atrasada · {{ dm(ck.d) }}{% else %}Próxima importação · {{ dm(ck.d) }}{% endif %}</b>
+        <span>{{ ck.motivo }}</span>
+        <a href="../Importar/">Abrir Importar</a>
+      </div>
+      <ul>
+        {% for i in ck.itens %}
+        <li class="{{ 'ok' if i.ok }}"><span class="st" aria-hidden="true">{{ '✓' if i.ok else '○' }}</span><span class="nm">{{ i.nome }}</span><span class="fm">{{ i.formato }}</span><span class="cm">{{ i.como }}</span><span class="at">{{ i.ate }}</span></li>
+        {% endfor %}
+      </ul>
+    </div>
+    {% endif %}
+  </section>
+
+  <section class="card">
+    <div style="display:flex;justify-content:space-between;align-items:baseline;gap:12px;flex-wrap:wrap">
+      <p class="eyebrow">Gasto neste ciclo · R$ {{ extension.brl(d.sel.consumo) }} pela data da compra</p>
+      <a class="btn-link" href="../Gastos/?de={{ d.start.isoformat() }}&ate={{ d.end.isoformat() }}">ver os {{ d.sel.cons_list|length }} itens</a>
+    </div>
+    <div class="spend">
+      <div class="rank">
+        {% for c in d.cats %}
+        <a href="../Gastos/?ano={{ d.start.year }}&conta={{ c.acc|urlencode }}&de={{ d.start.isoformat() }}&ate={{ d.end.isoformat() }}" class="{{ 'fixa' if c.fixa else 'var' }}">
+          <span class="l"><span>{{ c.name }}</span><span>R$ {{ extension.brl(c.v) }}</span></span>
+          <span class="bar"><i style="width: {{ (c.v / d.cat_max * 100)|round(1) }}%"></i></span>
+        </a>
+        {% else %}<p class="note">Nenhum gasto neste ciclo ainda.</p>{% endfor %}
+      </div>
+      <div>
+        <p class="eyebrow">Por meio</p>
+        <div class="meio-l">{% for m in d.meios %}<div><span>{{ m.name }}</span><b>R$ {{ extension.brl(m.v) }}</b></div>{% endfor %}</div>
+      </div>
+    </div>
+  </section>
+
+  {% set mx = d.matriz %}
+  <section class="card blk">
+    <div class="blk-head">
+      <div><h3>Resultado por ciclo</h3><p>Receitas menos despesas fixas e variáveis, pelo caixa: compras no cartão entram no ciclo em que a fatura vence.</p></div>
+    </div>
+    {% macro mrow(cls, op, name, vals, sw, gid, children, prevmask=None) %}
+      <tr class="{{ cls }}">
+        <td class="op">{{ op }}</td>
+        <td class="lb">{% if children %}<button type="button" class="exp" data-toggle="{{ gid }}" aria-expanded="false"><span class="chev">›</span>{% endif %}{% if sw %}<i class="sw {{ sw }}"></i>{% endif %}{{ name }}{% if children %}</button>{% endif %}</td>
+        {% for v in vals %}<td class="n{{ ' fc' if prevmask and prevmask[loop.index0] }}{{ ' focus' if mx.cols[loop.index0].start == d.start }}">{% if v %}{{ extension.brl(v) }}{% else %}<span class="z">·</span>{% endif %}</td>{% endfor %}
+      </tr>
+      {% for r in children %}
+      <tr class="rsub" data-parent="{{ gid }}">
+        <td class="op"></td><td class="lb">{{ r.name }}</td>
+        {% for v in r.show %}<td class="n{{ ' fc' if r.prev[loop.index0] }}{{ ' focus' if mx.cols[loop.index0].start == d.start }}">{% if v %}{{ extension.brl(v) }}{% else %}<span class="z">·</span>{% endif %}</td>{% endfor %}
+      </tr>
+      {% endfor %}
+    {% endmacro %}
+    <div class="tw"><table class="res-t mtx">
+      <colgroup><col class="c-op"><col class="c-lb">{% for c in mx.cols %}<col>{% endfor %}</colgroup>
+      <thead><tr><th></th><th></th>
+        {% for c in mx.cols %}<th class="{{ 'focus' if c.start == d.start }}"><a href="?c={{ c.key }}">{{ c.nome }}</a><small class="{{ 'fc-h' if c.atual }}">{{ 'em andamento' if c.atual else dm(c.start) ~ '–' ~ dm(c.end) }}</small></th>{% endfor %}
+      </tr></thead>
+      <tbody class="g-in">{{ mrow('r-inc', '+', 'Receitas', mx.rec_tot, 'inc', 'mx-inc', mx.receitas, mx.rec_prev) }}</tbody>
+      <tbody class="g-out">
+        {% for g in mx.grupos %}{{ mrow('r-fix' if g.key == 'Fixas' else 'r-var', '−', g.title, g.tot, 'fix' if g.key == 'Fixas' else 'var', 'mx-' ~ g.key, g.rows, g.prev) }}{% endfor %}
+      </tbody>
+      <tbody class="g-res">
+        <tr class="r-res"><td class="op">=</td><td class="lb">Resultado do ciclo</td>
+          {% for v in mx.res %}{% set c = mx.cols[loop.index0] %}<td class="n{{ ' focus' if c.start == d.start }}"><a class="pill {{ 'up' if v >= 0 else 'down' }}{{ ' fc' if c.atual }}" href="?c={{ c.key }}" data-tip="{{ c.nome }}{{ ' · previsto com as receitas que faltam entrar' if c.atual }}">{{ '+' if v > 0 }}{{ extension.brl(v) }}</a></td>{% endfor %}
+        </tr>
+        <tr class="r-acc"><td class="op"></td><td class="lb">Acumulado</td>
+          {% for v in mx.acum %}<td class="n{{ ' neg' if v < 0 }}{{ ' focus' if mx.cols[loop.index0].start == d.start }}">{{ extension.brl(v) }}</td>{% endfor %}
+        </tr>
+      </tbody>
+    </table></div>
+    <p class="note">Clique em Receitas, Despesas fixas ou variáveis para abrir as categorias. No ciclo em andamento, o que ainda vai entrar ou sair aparece hachurado: receitas previstas, assinaturas, parcelas e DAS.</p>
+  </section>
+
+  {# ------------------------------------------------------------ ciclo a ciclo, no formato do "Mês a mês" do Resumo #}
+  {% macro ccells(r, kind) %}
+    {% for v in r.show %}{% set c = mx.cols[loop.index0] %}
+      <td class="n{{ ' fc' if r.prev[loop.index0] }}{{ ' focus' if c.start == d.start }}"
+          {% if v and not r.prev[loop.index0] and kind != 'inc' %}style="--h:{{ r.heat[loop.index0] }}"{% endif %}
+          {% if v %}data-tip="{{ c.nome }} · {{ r.name }} · R$ {{ extension.brl(v, True) }}{{ ' (inclui previsto)' if r.prev[loop.index0] }}"{% endif %}>
+        {% if v %}<a href="?c={{ c.key }}">{{ extension.brl(v) }}</a>{% else %}<span class="z">·</span>{% endif %}
+      </td>
+    {% endfor %}
+    <td class="n tot">{% if r.total %}{{ extension.brl(r.total) }}{% else %}<span class="z">·</span>{% endif %}</td>
+    <td class="n avg">{% if r.avg %}{{ extension.brl(r.avg) }}{% else %}<span class="z">·</span>{% endif %}</td>
+  {% endmacro %}
+  {% macro ctotals(vals, prevmask) %}
+    {% for v in vals %}<td class="n{{ ' fc' if prevmask and prevmask[loop.index0] }}{{ ' focus' if mx.cols[loop.index0].start == d.start }}">{% if v %}{{ extension.brl(v) }}{% else %}<span class="z">·</span>{% endif %}</td>{% endfor %}
+  {% endmacro %}
+  {% macro chead() %}
+    <colgroup><col class="c-name">{% for c in mx.cols %}<col class="c-m">{% endfor %}<col class="c-t"><col class="c-t"></colgroup>
+    <thead><tr><th></th>{% for c in mx.cols %}<th class="{{ 'focus' if c.start == d.start }}"><a href="?c={{ c.key }}">{{ c.nome }}</a>{% if c.atual %}<small class="fc-h">em andamento</small>{% endif %}</th>{% endfor %}<th>Total</th><th>Média</th></tr></thead>
+  {% endmacro %}
+
+  <div class="block-title">
+    <h2>Ciclo a ciclo</h2>
+    <p>Cada categoria por ciclo, pelo caixa. Clique numa categoria com › para ver as subcategorias e num valor para abrir o ciclo. A média usa só os ciclos fechados.</p>
+  </div>
+
+  <section class="card blk">
+    <div class="blk-head">
+      <div><h3><i class="sw inc"></i>Receitas</h3><p>O que entrou pelo trabalho e outras fontes</p></div>
+      <div class="blk-sum"><span class="v">R$ {{ extension.brl(mx.rec_avg) }}</span><span class="p">por ciclo, em média</span></div>
+    </div>
+    <div class="tw"><table>
+      {{ chead() }}
+      <tbody>
+        {% for r in mx.receitas %}<tr class="cat"><td>{{ r.name }}</td>{{ ccells(r, 'inc') }}</tr>{% endfor %}
+        <tr class="subtotal"><td>Total</td>{{ ctotals(mx.rec_tot, mx.rec_prev) }}<td class="n tot">{{ extension.brl(mx.rec_total) }}</td><td class="n avg">{{ extension.brl(mx.rec_avg) }}</td></tr>
+      </tbody>
+    </table></div>
+  </section>
+
+  {% for g in mx.grupos %}
+  {% set outer = loop %}
+  <section class="card blk">
+    <div class="blk-head">
+      <div><h3><i class="sw {{ 'fix' if g.key == 'Fixas' else 'var' }}"></i>{{ g.title }}</h3><p>{{ g.hint }}</p></div>
+      <div class="blk-sum"><span class="v">R$ {{ extension.brl(g.avg) }}</span><span class="p">por ciclo, em média{% if mx.rec_avg %} · {{ '%.0f' % extension.pct(g.avg, mx.rec_avg) }}% da receita{% endif %}</span></div>
+    </div>
+    <div class="tw"><table>
+      {{ chead() }}
+      <tbody>
+        {% for r in g.rows %}
+          {% set gid = 'cc' ~ outer.index ~ '-' ~ loop.index %}
+          <tr class="cat{{ ' has-subs' if r.subs }}{{ ' review' if r.account.endswith('A-Revisar') }}" data-group="{{ gid }}"><td>{{ r.name }}</td>{{ ccells(r, g.key) }}</tr>
+          {% for sub in r.subs %}<tr class="sub" data-parent="{{ gid }}"><td>{{ sub.name }}</td>{{ ccells(sub, g.key) }}</tr>{% endfor %}
+        {% endfor %}
+        <tr class="subtotal"><td>Total</td>{{ ctotals(g.tot, g.prev) }}<td class="n tot">{{ extension.brl(g.total) }}</td><td class="n avg">{{ extension.brl(g.avg) }}</td></tr>
+      </tbody>
+    </table></div>
+  </section>
+  {% endfor %}
+
+  {% set sl = d.saldos %}
+  <section class="card blk cc-res">
+    <div class="blk-head">
+      <div><h3>Resultado e saldo</h3><p>Receitas menos despesas em cada ciclo, e quanto havia de fato nas contas e nos cartões quando o ciclo terminou.</p></div>
+      {% set ult = sl[-1] %}
+      <div class="blk-sum"><span class="v {{ 'pos' if ult.liquido >= 0 else 'neg' }}">R$ {{ extension.brl(ult.liquido) }}</span><span class="p">saldo líquido previsto em {{ dm(mx.cols[-1].end) }}</span></div>
+    </div>
+    <div class="tw"><table>
+      {{ chead() }}
+      <tbody>
+        <tr class="cat"><td>Receitas</td>{{ ctotals(mx.rec_tot, mx.rec_prev) }}<td class="n tot">{{ extension.brl(mx.rec_total) }}</td><td class="n avg">{{ extension.brl(mx.rec_avg) }}</td></tr>
+        {% for g in mx.grupos %}<tr class="cat"><td>− {{ g.title }}</td>{{ ctotals(g.tot, g.prev) }}<td class="n tot">{{ extension.brl(g.total) }}</td><td class="n avg">{{ extension.brl(g.avg) }}</td></tr>{% endfor %}
+        {% set rt = mx.res|sum %}
+        <tr class="subtotal res"><td>= Resultado do ciclo</td>
+          {% for v in mx.res %}{% set c = mx.cols[loop.index0] %}<td class="n{{ ' fc' if c.atual }}{{ ' focus' if c.start == d.start }} {{ 'pos' if v >= 0 else 'neg' }}">{{ '+' if v > 0 }}{{ extension.brl(v) }}</td>{% endfor %}
+          <td class="n tot {{ 'pos' if rt >= 0 else 'neg' }}">{{ '+' if rt > 0 }}{{ extension.brl(rt) }}</td><td class="n avg"></td></tr>
+        <tr class="acc"><td>Acumulado</td>{% for v in mx.acum %}<td class="n{{ ' neg' if v < 0 }}{{ ' focus' if mx.cols[loop.index0].start == d.start }}">{{ extension.brl(v) }}</td>{% endfor %}<td></td><td></td></tr>
+        <tr class="sep"><td colspan="{{ mx.cols|length + 3 }}"></td></tr>
+        <tr class="cat"><td>Nas contas no fim</td>{% for x in sl %}{% set c = mx.cols[loop.index0] %}<td class="n{{ ' fc' if x.prev }}{{ ' part' if x.faltam }}{{ ' focus' if c.start == d.start }}" data-tip="{{ c.nome }} · {{ extension.fin_textos().contas }}{{ ' · previsto se não gastar mais no Pix/débito' if x.prev }}{{ ' · ' ~ x.nota if x.nota }}">{{ extension.brl(x.contas) }}</td>{% endfor %}<td></td><td></td></tr>
+        <tr class="cat"><td>− Dívida nos cartões</td>{% for x in sl %}{% set c = mx.cols[loop.index0] %}<td class="n{{ ' fc' if x.prev }}{{ ' focus' if c.start == d.start }}" data-tip="{{ c.nome }} · compras feitas que ainda não venceram">{{ extension.brl(x.divida) }}</td>{% endfor %}<td></td><td></td></tr>
+        <tr class="subtotal res"><td>= Saldo líquido no fim</td>{% for x in sl %}{% set c = mx.cols[loop.index0] %}<td class="n{{ ' fc' if x.prev }}{{ ' part' if x.faltam }}{{ ' focus' if c.start == d.start }} {{ 'pos' if x.liquido >= 0 else 'neg' }}">{{ extension.brl(x.liquido) }}</td>{% endfor %}<td></td><td></td></tr>
+      </tbody>
+    </table></div>
+    <p class="note">Resultado = receitas − despesas do ciclo. Saldo = dinheiro de verdade no último dia do ciclo; pode diferir do acumulado por transferências para contas sem extrato e meses sem extrato. Valores esmaecidos: ciclo sem extrato de alguma conta. No ciclo em andamento (hachurado): previsão para {{ dm(mx.cols[-1].end) }}.</p>
+  </section>
+
+  {% set h = d.hist %}
+  <section class="card blk hist-card">
+    <div class="blk-head">
+      <div><h3>Ciclos anteriores</h3><p>Pelo caixa: o que entrou no ciclo contra o que venceu nele (faturas + Pix/débito). Clique num ciclo para abrir.</p></div>
+      {% if h.media %}
+      <div class="blk-sums">
+        <div class="blk-sum"><span class="v {{ 'pos' if h.media.res >= 0 else 'neg' }}">{{ '+' if h.media.res > 0 }}R$ {{ extension.brl(h.media.res) }}</span><span class="p">resultado médio · últimos {{ h.media.n }} ciclos</span></div>
+        {% if h.media.sobra_pct is not none %}<div class="blk-sum"><span class="v">{{ '%.0f' % h.media.sobra_pct }}%</span><span class="p">da receita sobra, em média</span></div>{% endif %}
+      </div>
+      {% endif %}
+    </div>
+
+    {% set c = h.chart %}
+    <svg class="hchart" viewBox="0 0 {{ c.W }} {{ c.H }}" role="img" aria-label="Resultado de cada ciclo">
+      <line class="zero" x1="0" x2="{{ c.W }}" y1="{{ c.mid }}" y2="{{ c.mid }}"/>
+      {% for b in c.bars %}
+      <a href="?c={{ b.key }}">
+        <rect x="{{ b.x }}" y="{{ b.y }}" width="{{ b.w }}" height="{{ b.h }}" rx="3"
+              class="{{ 'up' if b.pos else 'down' }}{{ ' part' if b.parcial }}{{ ' inc' if b.incompleto }}{{ ' sel' if b.key == d.end.strftime('%Y-%m') }}" data-tip="{{ b.tip }}"/>
+        <text class="v" x="{{ b.lx }}" y="{{ b.ly }}" text-anchor="middle">{{ b.label }}</text>
+        <text class="m" x="{{ b.lx }}" y="{{ c.H - 4 }}" text-anchor="middle">{{ b.nome }}</text>
+      </a>
+      {% endfor %}
+    </svg>
+
+    <div class="tw"><table class="hist">
+      <colgroup><col style="width:190px"><col><col style="width:220px"><col><col><col></colgroup>
+      <thead><tr>
+        <th style="text-align:left">Ciclo</th>
+        <th>Entrou</th>
+        <th>Saiu <small><i class="lg" style="background:var(--ink-2)"></i>faturas <i class="lg" style="background:var(--line-2)"></i>Pix/débito</small></th>
+        <th>Resultado <small>% que sobrou</small></th>
+        <th>vs. ciclo anterior</th>
+        <th>Gasto no ciclo <small>pela data da compra</small></th>
+      </tr></thead>
+      <tbody>
+        {% if h.media %}
+        <tr class="avg">
+          <td>Média ({{ h.media.n }} últimos)</td>
+          <td class="n">{{ extension.brl(h.media.entradas) }}</td>
+          <td class="n">{{ extension.brl(h.media.saidas) }}</td>
+          <td class="n">{{ '+' if h.media.res > 0 }}{{ extension.brl(h.media.res) }}{% if h.media.sobra_pct is not none %} <small>{{ '%.0f' % h.media.sobra_pct }}%</small>{% endif %}</td>
+          <td></td>
+          <td class="n">{{ extension.brl(h.media.consumo) }}</td>
+        </tr>
+        {% endif %}
+        {% for r in h.rows %}
+        <tr class="cat{{ ' sel' if r.start == d.start }}{{ ' dim' if r.incompleto }}">
+          <td>
+            <a href="?c={{ r.key }}"><b>{{ r.nome_longo }}</b></a>
+            <small>{{ dm(r.start) }} → {{ dm(r.end) }}</small>
+            {% if r.parcial %}<span class="tag warn">em andamento</span>{% elif r.incompleto %}<span class="tag">dados incompletos</span>{% endif %}
+            {% if h.melhor and r.key == h.melhor.key %}<span class="tag good">melhor</span>{% endif %}
+            {% if h.pior and r.key == h.pior.key and h.pior.res < 0 %}<span class="tag bad">pior</span>{% endif %}
+          </td>
+          <td class="n">{{ extension.brl(r.entradas) }}</td>
+          <td class="n">
+            {{ extension.brl(r.saidas) }}
+            <span class="split2" data-tip="Faturas R$ {{ extension.brl(r.saidas_cartao) }} · Pix/débito R$ {{ extension.brl(r.saidas_outras) }}"><i class="c" style="width: {{ r.cartao_pct }}%"></i><i class="o" style="width: {{ 100 - r.cartao_pct }}%"></i></span>
+          </td>
+          <td class="n">
+            <span class="pill {{ 'up' if r.res >= 0 else 'down' }}{{ ' fc' if r.parcial }}">{{ '+' if r.res > 0 }}{{ extension.brl(r.res) }}</span>
+            {% if r.sobra_pct is not none and not r.parcial %}<small class="{{ 'pos' if r.sobra_pct >= 0 else 'neg' }}">{{ '%.0f' % r.sobra_pct }}%</small>{% endif %}
+          </td>
+          <td class="n">
+            {% if r.d_res is not none %}
+            <span class="delta {{ 'pos' if r.d_res >= 0 else 'neg' }}">{{ '▲' if r.d_res >= 0 else '▼' }} {{ extension.brl(r.d_res|abs) }}</span>
+            <small>{{ 'melhor' if r.d_res >= 0 else 'pior' }} que o anterior</small>
+            {% else %}<span class="z">·</span>{% endif %}
+          </td>
+          <td class="n">
+            {{ extension.brl(r.consumo) }}
+            {% if r.d_cons_pct is not none %}<small class="{{ 'neg' if r.d_cons_pct > 0 else 'pos' }}">{{ '+' if r.d_cons_pct > 0 }}{{ '%.0f' % r.d_cons_pct }}%</small>{% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table></div>
+    <p class="note"><b>Resultado</b> = entrou − saiu no ciclo. <b>Gasto no ciclo</b> conta pela data da compra: uma compra no cartão feita no ciclo só sai do caixa no ciclo seguinte, por isso os dois não batem. "Dados incompletos": ciclos antes de 01/12/2025, quando começa o extrato da conta PF.</p>
+  </section>
+  {% endif %}
+</div>

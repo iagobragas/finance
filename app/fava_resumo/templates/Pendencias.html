@@ -1,0 +1,38 @@
+{% include '_style.html' %}
+<style>
+.pd { max-width: 1150px; }
+.pd .sec h3 { margin: 0; font-size: 16px; display: flex; align-items: center; gap: 10px; }
+.pd .sec h3 .n { font: 600 12px var(--font-ui); padding: 2px 8px; border-radius: 999px; background: var(--warn-bg); color: var(--warn-ink); }
+.pd .sec > p { margin: 4px 0 12px; font-size: 13px; color: var(--muted); line-height: 1.5; }
+.pd .it { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 12px; align-items: center; padding: 12px 0; border-top: 1px solid var(--line); }
+.pd .it .t { font-weight: 600; font-size: 14px; }
+.pd .it .s { font-size: 12px; color: var(--muted); margin-top: 3px; }
+.pd .it .s b { color: var(--ink-2); font-weight: 600; }
+.pd .act { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; justify-content: flex-end; }
+.pd select { font: 13px var(--font-ui); color: var(--ink); background: var(--surface); border: 1px solid var(--line-2); border-radius: 8px; padding: 7px 8px; max-width: 280px; }
+.pd .btn { font: 600 12px var(--font-ui); border: 0; border-radius: 8px; padding: 8px 12px; cursor: pointer; background: var(--accent); color: var(--on-accent); text-decoration: none; }
+.pd .btn.ghost { background: var(--surface-2); color: var(--ink); }
+.pd .btn:disabled { opacity: .4; cursor: default; }
+.pd label.chk { font-size: 12px; color: var(--ink-2); display: flex; gap: 5px; align-items: center; }
+.pd details summary { cursor: pointer; font-size: 12px; color: var(--ink-2); margin-top: 6px; }
+.pd details ul { list-style: none; margin: 6px 0 0; padding: 0; display: grid; gap: 3px; font: 12px var(--font-ui); color: var(--ink-2); }
+.pd .v { font-weight: 700; }
+.pd .in { color: var(--good); } .pd .out { color: var(--ink); }
+.pd .marco { display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap; font-size: 13px; color: var(--ink-2); line-height: 1.5; }
+.pd .marco b { color: var(--ink); }
+.pd .arq summary { cursor: pointer; font-size: 14px; color: var(--ink-2); }
+.pd .arq h4 { margin: 18px 0 4px; font-size: 13px; color: var(--muted); font-family: var(--font-ui); }
+.pd .done { text-align: center; padding: 50px 20px; }
+.pd .done .big { font-size: 40px; }
+.pd .toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); background: var(--ink); color: var(--surface); padding: 10px 16px; border-radius: 8px; font-size: 13px; opacity: 0; transition: opacity .2s; pointer-events: none; z-index: 50; }
+.pd .toast.on { opacity: 1; }
+</style>
+
+<script type="application/json" id="pd-data">{{ extension.page_json()|safe }}</script>
+
+<div class="rs pd" id="pd">
+  <div class="top"><div><p class="eyebrow">O que precisa da sua decisão</p><h1>Pendências <span id="pd-total" style="color:var(--muted);font-weight:500"></span></h1></div>
+    <nav class="seg" id="pd-ordem" aria-label="Ordenar"></nav></div>
+  <div id="pd-body"></div>
+  <div class="toast" id="pd-toast" role="status"></div>
+</div>
