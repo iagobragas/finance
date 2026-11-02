@@ -55,6 +55,7 @@ _CONTAS_CFG: dict = {}
 def contas_cfg() -> dict:
     """config/accounts.yaml (relido quando o arquivo muda)."""
     import yaml
+
     from app.paths import CONFIG
     f = CONFIG / "accounts.yaml"
     m = f.stat().st_mtime if f.exists() else 0
@@ -74,7 +75,7 @@ def contas_ordem() -> list:
     cfg = contas_cfg()
     accs = [*(cfg.get("sources") or {}).values(),
             *(c["conta"] for c in (cfg.get("ofx_contas") or {}).values() if not c.get("ignorar"))]
-    banco = lambda a: a.split(":")[-1] if a.startswith("Liabilities:") else a.split(":")[1]  # noqa: E731
+    banco = lambda a: a.split(":")[-1] if a.startswith("Liabilities:") else a.split(":")[1]
     bancos = list(dict.fromkeys(banco(a) for a in accs))
     accs = sorted(dict.fromkeys(accs), key=lambda a: (bancos.index(banco(a)), a.startswith("Liabilities:")))
     return [*accs, *(f"Assets:Reembolsos:{k}" for k in empresas()), "Assets:Fora-dos-Extratos"]
@@ -499,9 +500,6 @@ class Gastos(_Comum, FavaExtensionBase):
     @extension_endpoint("reembolso", ["POST"])
     def reembolso(self):
         """Marca/desmarca um gasto importado como reembolsável e reimporta."""
-        from pathlib import Path
-
-        import yaml
         from flask import jsonify, request
 
         from app.build import build, ler_reembolsos_cfg, salvar_reembolsos_cfg
@@ -1361,7 +1359,6 @@ class Ciclo(_Comum, FavaExtensionBase):
 
     def _hist(self, ciclos, first):
         """Histórico dos ciclos com diferenças para o anterior, médias e gráfico de resultado."""
-        from app.cycles import cycle_of
         _, inicio = __import__("app.cycles", fromlist=["_cfg"])._cfg()
         pf_ini = min((e.date for e in self.ledger.all_entries if isinstance(e, Transaction)
                       and any(p.account == "Assets:Inter:PF" for p in e.postings)), default=first)
@@ -1439,8 +1436,9 @@ class Ciclo(_Comum, FavaExtensionBase):
                 marks.append({"x": x(d), "d": d, "t": f"{'vence' if vence else 'fecha'} {nome}", "k": "due" if vence else "close",
                               "ok": d < today})
         try:
-            import yaml
             from pathlib import Path
+
+            import yaml
             mei = (yaml.safe_load((Path(self.ledger.beancount_file_path).resolve().parent.parent / "config" / "accounts.yaml").read_text()) or {}).get("mei") or {}
         except Exception:
             mei = {}
@@ -1453,6 +1451,7 @@ class Ciclo(_Comum, FavaExtensionBase):
         # dias de importar: um dia depois dos fechamentos (faturas + extratos)
         # e um dia depois da última receita do mês (extratos, para confirmar o que entrou)
         from datetime import timedelta as _td
+
         from app.organize import STATEMENTS
         def ultimo(pasta):
             ds = []
@@ -1562,7 +1561,6 @@ class Importar(_Comum, FavaExtensionBase):
         import json
 
         from app.organize import INBOX, STATEMENTS
-        from app.parsers import detect
 
         fontes = []
         for pasta, (nome, como, prazo) in FONTE_NOMES.items():
@@ -1600,9 +1598,9 @@ class Importar(_Comum, FavaExtensionBase):
 
     @extension_endpoint("enviar", ["POST"])
     def enviar(self):
+        import yaml
         from flask import jsonify, request
 
-        import yaml
         from app.build import CONFIG as CFG_DIR
         from app.build import OUTPUT, build
         from app.organize import INBOX, organize
@@ -1855,7 +1853,7 @@ class Pendencias(_Comum, FavaExtensionBase):
             else:
                 ov.pop("marco_zero", None)
         elif tipo == "hora_extra":
-            from app.forecast import CONFIG as FC, load_config, save_config
+            from app.forecast import load_config, save_config
             plano = load_config()
             fontes = {label(a): a for a in plano["receitas"]} | {n: f"Income:Trabalho:{k}" for k, n in empresas().items()}
             plano["extras_receita"].append({"fonte": fontes.get(j.get("fonte"), j.get("fonte")), "mes": j["d"][:7],
@@ -2046,7 +2044,7 @@ class Contas(_Comum, FavaExtensionBase):
                     v = r["fatura"]
                     if len(v) == 10:
                         return date.fromisoformat(v)
-                    return card_due(date.fromisoformat(r["d"]), int(cyc["fecha"]), int(cyc["vence"]))
+                    return card_due(date.fromisoformat(r["d"]), int(cyc["fecha"]), int(cyc["vence"]))  # noqa: B023 (usada na mesma volta)
                 aberta = card_due(hoje, int(cyc["fecha"]), int(cyc["vence"]))
                 pai = contas[-1]
                 for nome in pai["cartoes"]:
@@ -2113,7 +2111,8 @@ class Simulador(_Comum, FavaExtensionBase):
     def _certos(self, fc, today, n=6):
         """O que já vai sair com certeza, por mês de PAGAMENTO (vencimento da fatura): parcelas de compras
         feitas, assinaturas ativas e DAS."""
-        from app.assinaturas import cobrancas, nome as nome_limpo
+        from app.assinaturas import cobrancas
+        from app.assinaturas import nome as nome_limpo
         from app.cycles import _cfg, card_due
         from app.diasuteis import proximo_dia_util
         cards = _cfg()[0]
@@ -2168,7 +2167,7 @@ class Simulador(_Comum, FavaExtensionBase):
         out = []
         for ym in meses:
             its = sorted(itens.get(ym, []), key=lambda i: ({"fatura": 0, "parcela": 1, "assinatura": 2, "das": 3}[i["tipo"]], -i["valor"]))
-            tot = lambda t: sum((i["valor"] for i in its if i["tipo"] == t), Decimal(0))
+            tot = lambda t: sum((i["valor"] for i in its if i["tipo"] == t), Decimal(0))  # noqa: B023 (usada na mesma volta)
             out.append({"mes": f"{MESES[ym[1] - 1]}/{str(ym[0])[2:]}", "itens": its, "total": sum((i["valor"] for i in its), Decimal(0)),
                         "faturas": tot("fatura"), "parcelas": tot("parcela"), "assinaturas": tot("assinatura"), "das": tot("das")})
         restantes = [p for p in fc["parcelas_futuras"]]

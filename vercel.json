@@ -3,7 +3,7 @@
   "framework": "flask",
   "functions": {
     "index.py": {
-      "excludeFiles": "{docs/**,dados/**,.venv/**,tests/**}"
+      "excludeFiles": "{docs/**,dados/**,.venv/**,tests/**,.github/**}"
     }
   }
 }

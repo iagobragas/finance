@@ -8,9 +8,9 @@ from __future__ import annotations
 
 import re
 import xml.etree.ElementTree as ET
-from datetime import date, datetime
 from decimal import Decimal
 from pathlib import Path
+
 from app.paths import DATA
 
 NOTAS = DATA / "notas"

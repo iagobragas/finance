@@ -9,12 +9,12 @@ from __future__ import annotations
 import re
 import unicodedata
 from collections import defaultdict
-from datetime import date, timedelta
+from datetime import date
 from decimal import Decimal
-from pathlib import Path
 
 import yaml
 from beancount.core.data import Transaction
+
 from app.paths import CONFIG as CONFIG_DIR
 
 CONFIG = CONFIG_DIR / "assinaturas.yaml"

@@ -7,9 +7,9 @@ from __future__ import annotations
 
 from datetime import date, timedelta
 from functools import lru_cache
-from pathlib import Path
 
 import yaml
+
 from app.paths import CONFIG as CONFIG_DIR
 
 CONFIG = CONFIG_DIR / "accounts.yaml"

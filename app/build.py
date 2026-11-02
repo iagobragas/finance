@@ -286,7 +286,8 @@ def build(verbose: bool = True) -> dict:
 
     base, marcados = load_reembolsos()
     reemb_cfg = ler_reembolsos_cfg()[1]
-    from app.forecast import _lookup, extra_em, load_config as load_plano, valor_em
+    from app.forecast import _lookup, extra_em, valor_em
+    from app.forecast import load_config as load_plano
     plano = load_plano()
 
     def base_em(acc, d):
@@ -300,7 +301,7 @@ def build(verbose: bool = True) -> dict:
     manuais = manual_reembolsos()
     order = sorted([("i", items[i][1].date, i) for i in range(len(items))] + [("m", d, (f, v)) for d, f, v in manuais],
                    key=lambda x: (x[1], x[0] == "i"))
-    for tipo, _, ref in order:  # noqa: B007 (_ = data, usada nos reembolsos manuais)
+    for tipo, _, ref in order:
         if tipo == "m":
             pendente[ref[0]].append([_, ref[1]])
             continue

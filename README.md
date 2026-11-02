@@ -233,9 +233,12 @@ demo.py, index.py       demo pública na Vercel (exemplo/, somente leitura)
 Antes de abrir um PR:
 
 ```sh
+uv run ruff check .  # lint
 uv run pytest        # importa e valida o exemplo/ e abre todas as abas
 ./finance exemplo    # confira visualmente
 ```
+
+O GitHub Actions roda os dois a cada push e PR (`.github/workflows/ci.yml`).
 
 **Dependências:** declare em `pyproject.toml` e rode `uv lock`. O `uv.lock` vale para todos: o `./finance`, os testes e a demo na Vercel.
 

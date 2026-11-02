@@ -12,11 +12,11 @@ from __future__ import annotations
 from collections import defaultdict
 from datetime import date, timedelta
 from decimal import Decimal
-from pathlib import Path
 from statistics import median
 
 import yaml
 from beancount.core.data import Transaction
+
 from app.paths import CONFIG as CONFIG_DIR
 
 CONFIG = CONFIG_DIR / "accounts.yaml"
