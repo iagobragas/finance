@@ -22,12 +22,22 @@ os.environ["FINANCE_DATA"] = str(DEMO_DATA)
 sys.path.insert(0, str(ROOT))  # para o Fava achar a extensão app.fava_resumo
 
 from fava.application import create_app  # noqa: E402
+from flask import request  # noqa: E402
 
 from app.build import build  # noqa: E402
 
 build(verbose=False)
 
-app = create_app([DEMO_DATA / "ledger" / "main.beancount"], read_only=True)
+app = create_app([DEMO_DATA / "ledger" / "main.beancount"])
+
+# Somente leitura: bloqueia tudo que não é GET, menos rotas que só calculam (prévia do Planejamento).
+SO_CALCULA = ("/extension/Planejamento/simular",)
+
+
+@app.before_request
+def _somente_leitura():
+    if request.method != "GET" and not request.path.endswith(SO_CALCULA):
+        return {"success": False, "error": "Demo somente leitura: rode localmente para editar."}, 403
 
 
 def _decodifica_path(wsgi_app):
@@ -50,12 +60,6 @@ BANNER = (
     '<a href="https://github.com/iagobragas/finance" style="color:inherit;font-weight:600">'
     "Código no GitHub</a>, rode localmente para usar com os seus extratos.</div>"
 )
-
-
-@app.errorhandler(401)
-def _somente_leitura(_):
-    # o modo read_only do Fava recusa tudo que não é GET (lançar, editar, importar…)
-    return {"success": False, "error": "Demo somente leitura: rode localmente para editar."}, 403
 
 
 @app.after_request
