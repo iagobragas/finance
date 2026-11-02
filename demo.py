@@ -10,6 +10,7 @@ import os
 import shutil
 import sys
 from pathlib import Path
+from urllib.parse import unquote_to_bytes
 
 ROOT = Path(__file__).resolve().parent
 DEMO_DATA = Path("/tmp/finance-demo")
@@ -27,6 +28,20 @@ from app.build import build  # noqa: E402
 build(verbose=False)
 
 app = create_app([DEMO_DATA / "ledger" / "main.beancount"], read_only=True)
+
+
+def _decodifica_path(wsgi_app):
+    # a Vercel entrega PATH_INFO ainda com %XX; o slug do livro tem acento ("finanças-exemplo")
+    def wrapper(environ, start_response):
+        path = environ.get("PATH_INFO", "")
+        if "%" in path:
+            environ["PATH_INFO"] = unquote_to_bytes(path).decode("latin-1")  # WSGI: bytes como latin-1
+        return wsgi_app(environ, start_response)
+
+    return wrapper
+
+
+app.wsgi_app = _decodifica_path(app.wsgi_app)
 
 BANNER = (
     '<div style="position:sticky;top:0;z-index:9999;padding:6px 12px;text-align:center;'
