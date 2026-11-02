@@ -4,7 +4,7 @@
 
 **Controle financeiro pessoal e de MEI que roda no seu Mac.** Você baixa os extratos do banco e arrasta para o painel. O sistema categoriza tudo e mostra quanto sobra até o fim do mês, para onde foi o dinheiro e como ficam os próximos meses.
 
-**[Veja a demo →](https://finance-demo-xi.vercel.app)** com dados fictícios, somente leitura. Para usar com os seus extratos, rode localmente (é o que mantém seus dados só no seu computador).
+**[Veja a demo →](https://finance-demo.iagobragas.com.br)** com dados fictícios, somente leitura. Para usar com os seus extratos, rode localmente (é o que mantém seus dados só no seu computador).
 
 - 🔒 **100% local:** seus dados nunca saem do seu computador. Não tem conta, nuvem nem login no banco.
 - 🧾 **Lê os arquivos que o banco já te dá:** Inter, Nubank, Cora e qualquer banco que exporte OFX.
