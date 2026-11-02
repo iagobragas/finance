@@ -44,8 +44,8 @@ def _decodifica_path(wsgi_app):
 app.wsgi_app = _decodifica_path(app.wsgi_app)
 
 BANNER = (
-    '<div style="position:sticky;top:0;z-index:9999;padding:6px 12px;text-align:center;'
-    'font:13px/1.4 system-ui,sans-serif;background:#fff3cd;color:#664d03;border-bottom:1px solid #ffe69c">'
+    '<div style="position:fixed;left:0;right:0;bottom:0;z-index:9999;padding:6px 12px;text-align:center;'
+    'font:13px/1.4 system-ui,sans-serif;background:#fff3cd;color:#664d03;border-top:1px solid #ffe69c">'
     "Demonstração com dados fictícios, somente leitura. "
     '<a href="https://github.com/iagobragas/finance" style="color:inherit;font-weight:600">'
     "Código no GitHub</a>, rode localmente para usar com os seus extratos.</div>"
