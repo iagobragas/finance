@@ -11,7 +11,7 @@ import shutil
 import sys
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parent.parent
+ROOT = Path(__file__).resolve().parent
 DEMO_DATA = Path("/tmp/finance-demo")
 
 # FINANCE_DATA precisa estar definido antes de importar app.* (app/paths.py lê na importação)
