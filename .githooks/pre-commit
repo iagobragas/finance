@@ -1,0 +1,21 @@
+#!/bin/sh
+# Bloqueia commits com dados pessoais: extratos, a pasta de dados, CPF/CNPJ.
+# Ative uma vez por clone: git config core.hooksPath .githooks
+# (em caso de falso positivo e certeza do conteúdo: git commit --no-verify)
+
+files=$(git diff --cached --name-only --diff-filter=ACM)
+[ -z "$files" ] && exit 0
+erro=0
+
+ruim=$(printf '%s\n' "$files" | grep -E '^(dados|config|ledger|statements|inbox|comprovantes|notas|legacy)/|\.(ofx|OFX|xlsx|xls)$|^[^/]+\.(csv|pdf)$' | grep -v '^exemplo/')
+if [ -n "$ruim" ]; then
+  echo "✗ arquivos de dados no commit (devem ficar fora do git):"; printf '  %s\n' $ruim; erro=1
+fi
+
+docs=$(git diff --cached -U0 -- $files ':!LICENSE' | grep '^+' | grep -nE '[0-9]{3}\.[0-9]{3}\.[0-9]{3}-[0-9]{2}|[0-9]{2}\.[0-9]{3}\.[0-9]{3}/[0-9]{4}-[0-9]{2}')
+if [ -n "$docs" ]; then
+  echo "✗ parece haver CPF ou CNPJ nas linhas adicionadas:"; echo "$docs" | head -5; erro=1
+fi
+
+[ $erro = 1 ] && echo "Commit bloqueado. Veja o README (Privacidade)." 
+exit $erro

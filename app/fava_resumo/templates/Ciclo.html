@@ -134,7 +134,7 @@
 <div class="rs cy{{ ' modo-media' if d.is_next }}">
   <div class="top">
     <div>
-      <p class="eyebrow">{{ 'Ciclo atual' if d.is_current else ('Próximo ciclo' if d.prox.k == 1 else d.prox.k ~ ' ciclos à frente') ~ ' · prévia' if d.is_next else 'Ciclo' }} {% set tx = extension.fin_textos() %}{% if tx.dias %} · pago com a receita dos dias {{ tx.dias }}{% endif %}</p>
+      <p class="eyebrow">{{ 'Ciclo atual' if d.is_current else ('Próximo ciclo' if d.prox.k == 1 else d.prox.k ~ ' ciclos à frente') ~ ' · prévia' if d.is_next else 'Ciclo' }} {% set tx = extension.fin_textos() %}{% if tx.dias %} · pago com a receita {{ tx.dias }}{% endif %}</p>
       <h1>{{ dm(d.start) }} → {{ dm(d.end) }}</h1>
     </div>
     <nav class="nav" aria-label="Ciclos">

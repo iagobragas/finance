@@ -126,7 +126,9 @@ class _Comum:
         contas = [a for a in contas_ordem() if conta_tipo(a) == "conta"]
         nomes = contas_nomes()
         fechas = sorted({int(c["fecha"]) for c in (cfg.get("card_cycles") or {}).values() if c.get("fecha")})
-        return {"dias": " e ".join(map(str, dias)), "contas": " + ".join(nomes.get(a, label(a)).replace("Conta ", "") for a in contas),
+        dias_txt = (f"do dia {dias[0]}" if len(dias) == 1 else
+                    f"dos dias {', '.join(map(str, dias[:-1]))} e {dias[-1]}" if dias else "")
+        return {"dias": dias_txt, "contas": " + ".join(nomes.get(a, label(a)).replace("Conta ", "") for a in contas),
                 "fecha": " e ".join(map(str, fechas))}
 
 
