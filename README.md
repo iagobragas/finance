@@ -41,7 +41,7 @@ cd finance
 ./finance exemplo
 ```
 
-O painel abre em **http://localhost:5050** com dados fictícios, para você explorar. Na primeira vez, o `./finance` baixa o Python e instala as dependências sozinho (com o [uv](https://docs.astral.sh/uv/), nas versões travadas em `uv.lock`), o que leva menos de um minuto. Para sair, use `Ctrl+C`.
+O painel abre em **http://localhost:5050** com dados fictícios, para você explorar. Para abrir em outro navegador ou em janela anônima, defina `FINANCE_BROWSER`, por exemplo `export FINANCE_BROWSER='open -na "Google Chrome" --args --incognito {url}'`. Na primeira vez, o `./finance` baixa o Python e instala as dependências sozinho (com o [uv](https://docs.astral.sh/uv/), nas versões travadas em `uv.lock`), o que leva menos de um minuto. Para sair, use `Ctrl+C`.
 
 ### Usar com os seus dados
 
