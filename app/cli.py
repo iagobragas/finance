@@ -5,6 +5,7 @@
 ./finance exemplo    -> abre o Fava com os dados fictícios de exemplo/
 
 Os dados ficam em dados/ (ou em $FINANCE_DATA). Veja o README.
+Navegador: o padrão do sistema, ou o comando em $FINANCE_BROWSER ({url} é trocado pelo endereço).
 """
 
 from __future__ import annotations
@@ -58,17 +59,30 @@ def already_running() -> bool:
         return s.connect_ex(("127.0.0.1", PORT)) == 0
 
 
+def abrir(url: str):
+    """Abre o painel no navegador padrão, ou com o comando de $FINANCE_BROWSER.
+
+    Ex.: export FINANCE_BROWSER='open -na "Google Chrome" --args --incognito {url}'
+    """
+    cmd = os.environ.get("FINANCE_BROWSER")
+    if not cmd:
+        webbrowser.open(url)
+        return
+    import shlex
+    subprocess.Popen([a.replace("{url}", url) for a in shlex.split(cmd)] + ([] if "{url}" in cmd else [url]))
+
+
 def serve():
     url = f"http://localhost:{PORT}"
     if already_running():
         print(f"→ Fava já está rodando, abrindo {url}")
-        webbrowser.open(url)
+        abrir(url)
         return
     build()
     check()
     threading.Thread(target=watch, daemon=True).start()
     print(f"\n→ Fava em {url}  (Ctrl+C para sair)\n")
-    threading.Timer(1.5, webbrowser.open, [url]).start()
+    threading.Timer(1.5, abrir, [url]).start()
     env = {**os.environ, "PYTHONPATH": str(ROOT)}  # para o Fava achar a extensão app.fava_resumo
     subprocess.run([BIN / "fava", "--host", "127.0.0.1", "--port", str(PORT), LEDGER], env=env)
 
