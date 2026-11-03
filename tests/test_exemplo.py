@@ -77,6 +77,9 @@ assert c.post(b + "/extension/Planejamento/salvar", json={{}}).status_code == 40
 assert c.post(b + "/extension/Planejamento/simular", json={{}}).status_code == 200
 r = c.get(b + "/extension/Resumo/")
 assert r.status_code == 200 and "Demonstração".encode() in r.data
+assert b'property="og:image" content="https://finance-demo.iagobragas.com.br/og.jpg"' in r.data
+og = c.get("/og.jpg")
+assert og.status_code == 200 and og.mimetype == "image/jpeg"
 """
 
 
