@@ -22,3 +22,6 @@ exemplo/ledger/imported.beancount
 # link local com o projeto da Vercel
 .vercel
 .env*
+
+# configuração local do Claude Code (skills de terceiros, ex.: cronfiscal): fica só nesta máquina
+.claude/
