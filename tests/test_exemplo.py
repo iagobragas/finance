@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import sys
+from io import BytesIO
 from pathlib import Path
 from urllib.parse import quote
 
@@ -63,6 +64,18 @@ def test_js_da_aba(client, base, aba):
 def test_previa_do_planejamento(client, base):
     r = client.post(f"{base}/extension/Planejamento/simular", json={})
     assert r.status_code == 200
+
+
+def test_importar_responde_com_pendencias(client, base):
+    arquivo = (BytesIO(b"nao,reconhecido\n1,2\n"), "teste-importar.csv")
+    r = client.post(f"{base}/extension/Importar/enviar", data={"files": arquivo}, content_type="multipart/form-data")
+    try:
+        assert r.status_code == 200
+        j = r.get_json()
+        assert j["ok"] is True
+        assert isinstance(j["pendencias"], int)
+    finally:
+        client.post(f"{base}/extension/Importar/descartar", json={"nome": "teste-importar.csv"})
 
 
 DEMO_CHECK = f"""
