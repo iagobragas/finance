@@ -1630,7 +1630,7 @@ class Importar(_Comum, FavaExtensionBase):
             "repetidos": [{"de": a, "para": str(b)} for a, b in rep["dup"]],
             "desconhecidos": rep["unknown"],
             "novos": max(0, depois - antes), "revisar": len(stats["review"]),
-            "pendencias": Pendencias.contar(self),
+            "pendencias": self.ledger.extensions.get_extension("Pendencias").contar(),
         })
 
     @extension_endpoint("descartar", ["POST"])
